@@ -135,7 +135,7 @@ int recode(char **argv) {
         setNewDataSize(&header, frameSize, frames);
 
         write_header(&header);
-        write_annotation(input_annotation, (&header) -> data_offset - 24);
+        write_annotation(input_annotation, (&header) -> data_offset - sizeof(AUDIO_HEADER));
     }
     else {
         int newSize = getNewAnnotation(output_annotation, argv);
@@ -145,11 +145,11 @@ int recode(char **argv) {
 
         setNewDataSize(&header, frameSize, frames);
 
-        (&header) -> data_offset = 24 + newSize;
+        (&header) -> data_offset = sizeof(AUDIO_HEADER) + newSize;
+
         write_header(&header);
         write_annotation(output_annotation, newSize);
     }
-
 
     int input_frame2[CHANNELS_MAX * sizeof(int)];
     int next_frame2[CHANNELS_MAX * sizeof(int)];
@@ -158,16 +158,12 @@ int recode(char **argv) {
 
     for (int i = 0; i < frames; i++)
     {
-
-        if(isSpeedUp()){
+        if(isSpeedUp())
             speedUp(&header, input_frame2, i);
-        }
-        else if(isSlowDown()){
+        else if(isSlowDown())
             slowDown(&header, input_frame2, next_frame2, i, frames);
-        }
-        else if(isCrypt()){
-            crypt(&header, input_frame2, i);
-        }
+        else if(isCrypt())
+            crypt(&header, input_frame2);
     }
     return 1;
 }

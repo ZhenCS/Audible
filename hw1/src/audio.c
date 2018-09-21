@@ -22,7 +22,7 @@
  */
 int read_header(AUDIO_HEADER *hp){
 
-    hp->magic_number = getStdinInt(4); //change 4 to 8 if using hexToInt
+    hp->magic_number = getStdinInt(4);
     hp->data_offset = getStdinInt(4);
     hp->data_size = getStdinInt(4);
     hp->encoding = getStdinInt(4);
@@ -69,9 +69,9 @@ int read_annotation(char *ap, unsigned int size){
     if(size%8 != 0 || size > ANNOTATION_MAX || size < 0)
         return 0;
 
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < size; i++)
     {
-        if((*(ap + i) = getchar()) == EOF);
+        if((*(ap + i) = getchar()) == EOF)
             return 0;
 
     }

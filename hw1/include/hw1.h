@@ -28,7 +28,6 @@ unsigned long hexStringToInt(char *string);
 int numbersOnly(char *string);
 
 //audioHelper.c
-char bitsToHex(int bit);
 int putCharInt(int i);
 int putByteInt(int i, int bytes);
 
@@ -56,10 +55,10 @@ int copyString(char *p1, char *p2);
 
 int speedUp(AUDIO_HEADER *header, int *fp, int i);
 int slowDown(AUDIO_HEADER *header, int *S, int *T, int i, int frames);
-int crypt(AUDIO_HEADER *header, int *fp, int i);
+int crypt(AUDIO_HEADER *header, int *fp);
 
 int setNewDataSize(AUDIO_HEADER *header, int framesize, int frames);
-int swapFrame(int *S, int *T, int channels);
+int copyFrame(int *S, int *T, int channels);
 int getInterpolation(signed int S, signed int T, signed int k, signed int N);
 
 #endif
