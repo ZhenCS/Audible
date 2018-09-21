@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "hw1.h"
 #include "debug.h"
@@ -23,6 +24,9 @@ int main(int argc, char **argv)
     if(global_options & (0x1L << 63)) {
         USAGE(*argv, EXIT_SUCCESS);
     }
+
+    if(!recode(argv))
+        return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
 }
