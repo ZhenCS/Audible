@@ -157,7 +157,7 @@ char *argv[];
                 usage(argv[0]);
         }
         char *ifile = argv[optind];
-        if(report == collate) {
+        if(report + collate > 1) {
                 fprintf(stderr, "Exactly one of '%s' or '%s' is required.\n\n",
                         option_table[REPORT].name, option_table[COLLATE].name);
                 usage(argv[0]);
