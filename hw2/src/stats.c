@@ -161,42 +161,43 @@ Freqs *count_score(scp, afp)
 Score *scp;
 Freqs *afp;
 {
-        Freqs *fp, *sfp;
-
-        for(fp = afp; fp != NULL; sfp = fp, fp = fp->next) {
-                if(fp->score == scp->grade) {
-                        fp->count++;
-                        return(afp);
-                } else if(fp->score > scp->grade) {
-                        if(sfp == NULL) {       /* insertion at head */
-                                sfp = newfreqs();
-                                sfp->next = fp;
-                                sfp->score = scp->grade;
-                                sfp->count = 1;
-                                return(sfp);    /* return new head */
-                        } else {                /* insertion in middle */
-                                sfp->next = newfreqs();
-                                sfp = sfp->next;
-                                sfp->next = fp;
-                                sfp->score = scp->grade;
-                                sfp->count = 1;
-                                return(afp);    /* return old head */
-                        }
-                } else continue;
-        }
-        if(sfp == NULL) {       /* insertion into empty list */
-                sfp->next = NULL;
-                sfp->score = scp->grade;
-                sfp->count = 1;
-                return(sfp);    /* return new head */
-        } else {                /* insertion at end of list */
-                sfp->next = newfreqs();
-                sfp = sfp->next;
-                sfp->next = NULL;
-                sfp->score = scp->grade;
-                sfp->count = 1;
-                return(afp);
-        }
+  Freqs *fp, *sfp;
+  sfp = NULL;
+  for(fp = afp; fp != NULL; sfp = fp, fp = fp->next) {
+          if(fp->score == scp->grade) {
+                  fp->count++;
+                  return(afp);
+          } else if(fp->score > scp->grade) {
+                  if(sfp == NULL) {       /* insertion at head */
+                          sfp = newfreqs();
+                          sfp->next = fp;
+                          sfp->score = scp->grade;
+                          sfp->count = 1;
+                          return(sfp);    /* return new head */
+                  } else {                /* insertion in middle */
+                          sfp->next = newfreqs();
+                          sfp = sfp->next;
+                          sfp->next = fp;
+                          sfp->score = scp->grade;
+                          sfp->count = 1;
+                          return(afp);    /* return old head */
+                  }
+          } else continue;
+  }
+  if(sfp == NULL) {       /* insertion into empty list */
+          sfp = newfreqs();
+          sfp->next = NULL;
+          sfp->score = scp->grade;
+          sfp->count = 1;
+          return(sfp);    /* return new head */
+  } else {                /* insertion at end of list */
+          sfp->next = newfreqs();
+          sfp = sfp->next;
+          sfp->next = NULL;
+          sfp->score = scp->grade;
+          sfp->count = 1;
+          return(afp);
+  }
 }
 
 /*
@@ -290,13 +291,13 @@ Stats *sp;
            if(csp->valid) {
                 csp->mean = csp->sum/csp->valid;
                 if(csp->valid == 1) {
-                   warning("Too few scores for %s.", csp->asgt->name);
+                   warning("Too few scores for %s.", 1, csp->asgt->name);
                    csp->stddev = 0.0;
                 } else {
-                   csp->stddev = stddev(csp->valid, csp->sum, csp->sumsq);
+                   csp->stddev = stddev(csp->valid,csp->sum, csp->sumsq);
                 }
            } else {
-                warning("No valid scores for %s.", csp->asgt->name);
+                warning("No valid scores for %s.", 1, csp->asgt->name);
                 csp->mean = 0.0;
                 csp->stddev = 0.0;
            }
@@ -304,14 +305,14 @@ Stats *sp;
               if(ssp->valid) {
                  ssp->mean = ssp->sum/ssp->valid;
                  if(ssp->valid == 1) {
-                        warning("Too few scores for %s, section %s.",
+                        warning("Too few scores for %s, section %s.", 2,
                                 ssp->asgt->name, ssp->section->name);
                         ssp->stddev = 0.0;
                  } else {
                     ssp->stddev = stddev(ssp->valid, ssp->sum, ssp->sumsq);
                  }
               } else {
-                 warning("No valid scores for %s, section %s.",
+                 warning("No valid scores for %s, section %s.", 2,
                          ssp->asgt->name, ssp->section->name);
                  ssp->mean = 0.0;
                  ssp->stddev = 0.0;

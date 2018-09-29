@@ -5,6 +5,7 @@
 
 #include<stddef.h>
 #include<stdio.h>
+#include<string.h>
 #include "global.h"
 #include "gradedb.h"
 #include "stats.h"
@@ -20,9 +21,8 @@
  *              options set for that score and for the assignment.
  */
 
-void normalize(c, s)
-Course *c;
-Stats *s;
+void normalize(c)
+Course *c; //Stats *s;
 {
         Student *stp;
         Score *rscp, *nscp;
@@ -94,14 +94,14 @@ Sectionstats *ssp;
                 switch(a->ngroup) {
                 case BYCLASS:
                         if(csp->stddev < EPSILON) {
-                           warning("Std. dev. of %s too small for normalization.",
+                           warning("Std. dev. of %s too small for normalization.", 1,
                                  csp->asgt->name);
                            csp->stddev = 2*EPSILON;
                          }
                         return(linear(s, csp->mean, csp->stddev, a->mean, a->stddev));
                 case BYSECTION:
                         if(ssp->stddev < EPSILON) {
-                           warning("Std. dev. of %s, section %s too small for normalization.",
+                           warning("Std. dev. of %s, section %s too small for normalization.", 2,
                                  ssp->asgt->name, ssp->section->name);
                            ssp->stddev = 2*EPSILON;
                          }
@@ -109,7 +109,7 @@ Sectionstats *ssp;
                 }
         case SCALE:
                 if(a->max < EPSILON) {
-                  warning("Declared maximum score of %s too small for normalization.",
+                  warning("Declared maximum score of %s too small for normalization.", 1,
                         csp->asgt->name);
                   a->max = 2*EPSILON;
                 }
@@ -120,7 +120,7 @@ Sectionstats *ssp;
                         fp = csp->freqs;
                         n = csp->tallied;
                         if(n == 0) {
-                           warning("Too few scores in %s for quantile normalization.",
+                           warning("Too few scores in %s for quantile normalization.", 1,
                                    csp->asgt->name);
                            n = 1;
                          }
@@ -129,7 +129,7 @@ Sectionstats *ssp;
                         fp = ssp->freqs;
                         n = ssp->tallied;
                         if(n == 0) {
-                           warning("Too few scores in %s, section %s for quantile normalization.",
+                           warning("Too few scores in %s, section %s for quantile normalization.", 2,
                                  ssp->asgt->name, ssp->section->name);
                            n = 1;
                          }
@@ -149,6 +149,7 @@ Sectionstats *ssp;
                         return((float)fp->numless*100.0/n);
                 }
         }
+        return 0;
 }
 
 /*
@@ -212,7 +213,7 @@ Atype t;
            }
         }
         if(n == 0 || w == 0.0) {
-                warning("Student %s %s has no like scores to average,\n%s",
+                warning("Student %s %s has no like scores to average,\n%s", 3,
                         s->name, s->surname, "using raw 0.0.");
                 return(0.0);
         } else {
@@ -249,7 +250,7 @@ Course *c;
                 }
               }
               if(!found) {
-                warning("Student %s %s has no score for assignment %s.",
+                warning("Student %s %s has no score for assignment %s.", 3,
                         stp->name, stp->surname, ap->name);
               }
            }

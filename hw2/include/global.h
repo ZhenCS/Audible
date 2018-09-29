@@ -15,3 +15,7 @@ typedef struct Ifile {
         struct Ifile *prev;
 } Ifile;
 
+void fatal(char *fmt, int i, ...);
+void error(char *fmt, int i, ...);
+void warning(char *fmt, int i, ...);
+void debug(char *fmt, int i, ...);

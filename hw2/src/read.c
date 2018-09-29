@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "global.h"
 #include "gradedb.h"
 #include "stats.h"
@@ -17,12 +18,11 @@
  */
 
 Ifile *ifile;
-
 /*
  * Token readahead buffer
  */
 
-char tokenbuf[32];
+char tokenbuf[64];
 char *tokenptr = tokenbuf;
 char *tokenend = tokenbuf;
 
@@ -34,9 +34,8 @@ char *root;
         ifile = newifile();
         ifile->prev = NULL;
         ifile->name = root;
-        ifile->line = 1;
         if((ifile->fd = fopen(root, "r")) == NULL)
-                fatal("Can't open data file %s.\n", root);
+                fatal("Can't open data file %s.\n", 1, root);
 
         fprintf(stderr, "[ %s", root);
         gobbleblanklines();
@@ -128,7 +127,7 @@ Assignment *a;
         if(!checktoken("SECTION")) return(NULL);
         s = newsection();
         s->name = readname();
-        s->assistant = readassistant();
+        s->assistant = readassistant();;
         s->roster = readstudents(a, s);
         s->next = readsections(a);
         return(s);
@@ -172,11 +171,11 @@ Assignment *a;
                         }
                 }
                 if(s->asgt == NULL)
-                   fatal("(%s:%d) Undeclared assignment %s encountered in student scores.",
+                   fatal("(%s:%d) Undeclared assignment %s encountered in student scores.", 3,
                          ifile->name, ifile->line, tokenptr);
                 flushtoken();
         } else {
-                fatal("(%s:%d) Expecting assignment ID.", ifile->name, ifile->line);
+                fatal("(%s:%d) Expecting assignment ID.", 2, ifile->name, ifile->line);
         }
         readgrade(s);
         expectnewline();
@@ -202,11 +201,11 @@ Score *s;
                         flushtoken();
                         s->grade = f;
                 } else {
-                        error("(%s:%d) Expected a numeric score.", ifile->name, ifile->line);
+                        error("(%s:%d) Expected a numeric score.", 2, ifile->name, ifile->line);
                         s->grade = 0.0;
                 }
                 if(s->asgt->max != 0.0 && s->grade > s->asgt->max)
-                  warning("(%s:%d) Grade (%f) exceeds declared maximum value (%f).\n",
+                  warning("(%s:%d) Grade (%f) exceeds declared maximum value (%f).\n", 4,
                           ifile->name, ifile->line, s->grade, s->asgt->max);
         } else {
                 switch(s->subst) {
@@ -216,11 +215,11 @@ Score *s;
                                 flushtoken();
                                 s->grade = f;
                         } else {
-                                error("(%s:%d) Expected a numeric value.", ifile->name, ifile->line);
+                                error("(%s:%d) Expected a numeric value.", 2, ifile->name, ifile->line);
                                 s->grade = 0.0;
                         }
                         if(s->asgt->max != 0.0 && s->grade > s->asgt->max)
-                          warning("(%s:%d) Grade (%f) exceeds declared maximum value (%f).\n",
+                          warning("(%s:%d) Grade (%f) exceeds declared maximum value (%f).\n", 4,
                                   ifile->name, ifile->line, s->grade, s->asgt->max);
                         break;
                 case USENORM:
@@ -234,24 +233,24 @@ Score *s;
                           case LINEAR:
                             if (s->lnorm < s->asgt->mean - 4.0*s->asgt->stddev ||
                                 s->lnorm > s->asgt->mean + 4.0*s->asgt->stddev)
-                              warning("(%s:%d) LINEAR score (%f) seems strange.\n",
+                              warning("(%s:%d) LINEAR score (%f) seems strange.\n", 3,
                                       ifile->name, ifile->line, s->lnorm);
                             break;
                           case QUANTILE:
                             if(s->qnorm < 0.0 || s->qnorm > 100.0) {
-                              error("(%s:%d) QUANTILE score (%f) not in [0.0, 100.0]\n",
+                              error("(%s:%d) QUANTILE score (%f) not in [0.0, 100.0]\n", 3,
                                     ifile->name, ifile->line, s->qnorm);
                             }
                             break;
                           case SCALE:
                             if(s->snorm < 0.0 || s->snorm > s->asgt->scale) {
-                              error("(%s:%d) SCALE score (%f) not in [0.0, %f]\n",
+                              error("(%s:%d) SCALE score (%f) not in [0.0, %f]\n", 4,
                                     ifile->name, ifile->line, s->snorm, s->asgt->scale);
                             }
                             break;
                           }
                         } else {
-                                error("(%s:%d) Expected a normalized score.", ifile->name, ifile->line);
+                                error("(%s:%d) Expected a normalized score.", 2, ifile->name, ifile->line);
                                 s->qnorm = s->lnorm = s->snorm = 0.0;
                         }
                         break;
@@ -275,7 +274,7 @@ Assignment *a;
                 a->wpolicy = WEIGHT;
                 a->weight = f;
         } else {
-                error("(%s:%d) Expected a numeric weight.", ifile->name, ifile->line);
+                error("(%s:%d) Expected a numeric weight.", 2, ifile->name, ifile->line);
                 a->wpolicy = NOWEIGHT;
         }
 }
@@ -289,7 +288,7 @@ Assignment *a;
                 flushtoken();
                 a->max = f;
         } else {
-                error("(%s:%d) Expected a numeric maximum score.", ifile->name, ifile->line);
+                error("(%s:%d) Expected a numeric maximum score.", 2, ifile->name, ifile->line);
         }
 }
 
@@ -313,7 +312,7 @@ Assignment *a;
                                 flushtoken();
                                 a->mean = f;
                         } else {
-                                error("(%s:%d) Expected a numeric mean, using 0.0.", ifile->name, ifile->line);
+                                error("(%s:%d) Expected a numeric mean, using 0.0.", 2, ifile->name, ifile->line);
                                 a->mean = 0.0;
                         }
                         advancetoken();
@@ -321,7 +320,8 @@ Assignment *a;
                                 flushtoken();
                                 a->stddev = f;
                         } else {
-                                error("(%s:%d) Expected a numeric standard deviation, using 1.0.", ifile->name, ifile->line);
+                                error("(%s:%d) Expected a numeric standard deviation, using 1.0.", 2,
+                                    ifile->name, ifile->line);
                                 a->stddev = 1.0;
                         }
                 } else if(checktoken("QUANTILE")) {
@@ -333,7 +333,7 @@ Assignment *a;
                                 flushtoken();
                                 a->scale = f;
                         } else {
-                                error("(%s:%d) Expected a numeric scale, using 0.0.", ifile->name, ifile->line);
+                                error("(%s:%d) Expected a numeric scale, using 0.0.", 2, ifile->name, ifile->line);
                                 a->scale = 0.0;
                         }
                 } else if(checktoken("BYCLASS")) {
@@ -346,7 +346,7 @@ Assignment *a;
         if(!found) {
                 a->npolicy = RAW;
                 a->ngroup = BYCLASS;
-                error("(%s:%d) Expected normalization information.", ifile->name, ifile->line);
+                error("(%s:%d) Expected normalization information.", 2, ifile->name, ifile->line);
         }
 }
 
@@ -356,7 +356,7 @@ Surname readsurname()
         if(!istoken()) advancetoken();
         if(istoken()) s = newstring(tokenptr, tokensize());
         else {
-                error("(%s:%d) Expected surname.", ifile->name, ifile->line);
+                error("(%s:%d) Expected surname.", 2, ifile->name, ifile->line);
                 s = newstring("", 0);
         }
         flushtoken();
@@ -369,10 +369,10 @@ Name readname()
         advanceeol();
         if(istoken()) n = newstring(tokenptr, tokensize());
         else {
-                error("(%s:%d) Expected a name.", ifile->name, ifile->line);
+                error("(%s:%d) Expected a name.", 2, ifile->name, ifile->line);
                 n = newstring("", 0);
         }
-        flushtoken();
+        flushtoken() ;
         expectnewline();
         return(n);
 }
@@ -383,7 +383,7 @@ Id readid()
         if(!istoken()) advancetoken();
         if(istoken()) i = newstring(tokenptr, tokensize());
         else {
-                error("(%s:%d) Expected an ID.", ifile->name, ifile->line);
+                error("(%s:%d) Expected an ID.", 2, ifile->name, ifile->line);
                 i = newstring("", 0);
         }
         flushtoken();
@@ -396,7 +396,7 @@ Atype readatype()
         if(!istoken()) advancetoken();
         if(istoken()) a = newstring(tokenptr, tokensize());
         else {
-                error("(%s:%d) Expected an assignment type.", ifile->name, ifile->line);
+                error("(%s:%d) Expected an assignment type.", 2, ifile->name, ifile->line);
                 a = newstring("", 0);
         }
         flushtoken();
@@ -435,7 +435,7 @@ int iswhitespace(c)
 char c;
 {
         if(c == ',' || c == ':' || c == ' ' ||
-                           c == '\t' || c == '\f') return(TRUE);
+            c == '\t' || c == '\f') return(TRUE);
         else return(FALSE);
 }
 
@@ -455,7 +455,7 @@ void gobbleblanklines()
           if((c = getc(ifile->fd)) == '#') {
             while((c = getc(ifile->fd)) != '\n') {
               if(c == EOF)
-                fatal("(%s:%d) EOF within comment line.",
+                fatal("(%s:%d) EOF within comment line.", 2,
                       ifile->name, ifile->line);
             }
             ifile->line++;
@@ -484,7 +484,7 @@ char nextchar()
         if(istoken()) return(*tokenptr++);
         flushtoken();
         if((c = getc(ifile->fd)) == EOF)
-           fatal("(%s:%d) Unexpected EOF.", ifile->name, ifile->line);
+           fatal("(%s:%d) Unexpected EOF.", 2, ifile->name, ifile->line);
         return(c);
 }
 
@@ -496,7 +496,7 @@ char nextchar()
 void advancetoken()
 {
         char c;
-        if(istoken()) error("(%s:%d) Flushing unread input token.", ifile->name, ifile->line);
+        if(istoken()) error("(%s:%d) Flushing unread input token.", 2, ifile->name, ifile->line);
         flushtoken();
         gobblewhitespace();
         while((c = getc(ifile->fd)) != EOF) {
@@ -517,7 +517,7 @@ void advancetoken()
 void advanceeol()
 {
         char c;
-        if(istoken()) error("(%s:%d) Flushing unread input token.", ifile->name, ifile->line);
+        if(istoken()) error("(%s:%d) Flushing unread input token.", 2, ifile->name, ifile->line);
         flushtoken();
         gobblewhitespace();
         while((c = getc(ifile->fd)) != EOF) {
@@ -526,9 +526,10 @@ void advanceeol()
                         break;
                 }
                 *tokenend++ = c;
+
         }
         if(c == EOF)
-                fatal("(%s:%d) Incomplete line at end of file.", ifile->name, ifile->line);
+                fatal("(%s:%d) Incomplete line at end of file.", 2, ifile->name, ifile->line);
         *tokenend++ = '\0';
 }
 
@@ -545,7 +546,7 @@ char *key;
         if(istoken() && !strcmp(tokenptr, key)) {
                 flushtoken();
         } else {
-                error("(%s:%d) Expected %s, found %s", ifile->name, ifile->line, key, tokenptr);
+                error("(%s:%d) Expected %s, found %s", 4, ifile->name, ifile->line, key, tokenptr);
         }
 }
 
@@ -578,7 +579,7 @@ void expectnewline()
           return;
         }
         else {
-                error("(%s:%d) Expected newline, scanning ahead.", ifile->name, ifile->line);
+                error("(%s:%d) Expected newline, scanning ahead.", 2, ifile->name, ifile->line);
                 flushtoken();
                 while((c = nextchar()) != '\n');
                 ifile->line++;
@@ -591,7 +592,7 @@ void expecteof()
         if(!istoken() && (c = getc(ifile->fd)) == EOF && ifile->prev == NULL)
            return;
         else {
-                error("(%s:%d) Expected EOF, skipping excess input.", ifile->name, ifile->line);
+                error("(%s:%d) Expected EOF, skipping excess input.", 2, ifile->name, ifile->line);
                 flushtoken();
                 while(ifile->prev != NULL) previousfile();
         }
@@ -601,14 +602,14 @@ void previousfile()
 {
         Ifile *prev;
         if((prev = ifile->prev) == NULL)
-                fatal("(%s:%d) No previous file.", ifile->name, ifile->line);
-        free(ifile);
+                fatal("(%s:%d) No previous file.", 2, ifile->name, ifile->line);
         fclose(ifile->fd);
+        free(ifile);
         ifile = prev;
         fprintf(stderr, " ]");
 }
 
-void pushfile(e)
+void pushfile()
 {
         Ifile *nfile;
         char *n;
@@ -616,7 +617,7 @@ void pushfile(e)
         advanceeol();
         if(istoken()) n = newstring(tokenptr, tokensize());
         else {
-                error("(%s:%d) Expected a file name.", ifile->name, ifile->line);
+                error("(%s:%d) Expected a file name.", 2, ifile->name, ifile->line);
                 n = newstring("", 0);
         }
         flushtoken();
@@ -627,7 +628,7 @@ void pushfile(e)
         nfile->name = n;
         nfile->line = 1;
         if((nfile->fd = fopen(n, "r")) == NULL)
-                fatal("(%s:%d) Can't open data file %s\n", ifile->name, ifile->line, n);
+                fatal("(%s:%d) Can't open data file %s\n", 3, ifile->name, ifile->line, n);
         ifile = nfile;
         fprintf(stderr, " [ %s", n);
         gobbleblanklines();

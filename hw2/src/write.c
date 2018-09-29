@@ -132,7 +132,7 @@ char *f;
 {
         FILE *fd;
         if((fd = fopen(f, "w")) == NULL) {
-                error("Can't write file: %s\n", f);
+                error("Can't write file: %s\n", 1, f);
                 return;
         }
         writecourse(fd, c);

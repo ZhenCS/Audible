@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
+
 #include "version.h"
 #include "global.h"
 #include "gradedb.h"
@@ -11,6 +12,9 @@
 #include "write.h"
 #include "normal.h"
 #include "sort.h"
+#include "report.h"
+
+
 
 /*
  * Course grade computation program
@@ -27,8 +31,8 @@
 #define HISTOGRAMS      8
 #define TABSEP          9
 #define ALLOUTPUT      10
-#define SORTBY         11
-#define NONAMES        12
+#define NONAMES        11
+#define SORTBY         12
 
 static struct option_info {
         unsigned int val;
@@ -66,9 +70,9 @@ static struct option_info {
                   "Sort by {name, id, score}."}
 };
 
-#define NUM_OPTIONS (14)
+#define NUM_OPTIONS (13)
 
-static char *short_options = "";
+static char *short_options = "rcank:";
 static struct option long_options[NUM_OPTIONS];
 
 static void init_options() {
@@ -103,11 +107,16 @@ char *argv[];
         while(optind < argc) {
             if((optval = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
                 switch(optval) {
+                case 'r':
                 case REPORT: report++; break;
+                case 'c':
                 case COLLATE: collate++; break;
                 case TABSEP: tabsep++; break;
+                case 'n':
                 case NONAMES: nonames++; break;
+                case 'k':
                 case SORTBY:
+                    if(optval == 'k') optval = SORTBY;
                     if(!strcmp(optarg, "name"))
                         compare = comparename;
                     else if(!strcmp(optarg, "id"))
@@ -128,6 +137,7 @@ char *argv[];
                 case COMPOSITES: composite++; break;
                 case INDIVIDUALS: scores++; break;
                 case HISTOGRAMS: histograms++; break;
+                case 'a':
                 case ALLOUTPUT:
                     freqs++; quantiles++; summaries++; moments++;
                     composite++; scores++; histograms++; tabsep++;
@@ -163,8 +173,8 @@ char *argv[];
 
         fprintf(stderr, "Calculating statistics...\n");
         s = statistics(c);
-        if(s == NULL) fatal("There is no data from which to generate reports.");
-        normalize(c, s);
+        if(s == NULL) fatal("There is no data from which to generate reports.", 0);
+        normalize(c); //s
         composites(c);
         sortrosters(c, comparename);
         checkfordups(c->roster);
@@ -174,7 +184,6 @@ char *argv[];
                 exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
         }
         sortrosters(c, compare);
-
         fprintf(stderr, "Producing reports...\n");
         reportparams(stdout, ifile, c);
         if(moments) reportmoments(stdout, s);
@@ -184,7 +193,7 @@ char *argv[];
         if(summaries) reportquantilesummaries(stdout, s);
         if(histograms) reporthistos(stdout, c, s);
         if(scores) reportscores(stdout, c, nonames);
-        if(tabsep) reporttabs(stdout, c, nonames);
+        if(tabsep) reporttabs(stdout, c); //nonames
 
         fprintf(stderr, "\nProcessing complete.\n");
         printf("%d warning%s issued.\n", warnings+errors,

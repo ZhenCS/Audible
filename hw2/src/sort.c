@@ -1,8 +1,11 @@
 
-#include "gradedb.h"
-#include "sort.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "gradedb.h"
+#include "sort.h"
+#include "global.h"
 
 /*
  * Sort the Class and Section Rosters
@@ -59,7 +62,7 @@ int compare();
         }
         if(count == 0) return(NULL);
         if((stab = (Student **)malloc(count*sizeof(Student))) == NULL)
-                warning("Not enough memory to perform sorting.");
+                warning("Not enough memory to perform sorting.", 0);
         sp = s;
         i = count;
         while(i--) {            /* Put students in table */
@@ -135,7 +138,7 @@ Student *s1, *s2;
 int compareid(s1, s2)
 Student *s1, *s2;
 {
-        int c;
+        //int c;
         return(strcmp(s1->id, s2->id));
 }
 
@@ -152,7 +155,7 @@ Student *sp;
 {
         while(sp != NULL && sp->cnext != NULL) {
                 if(!comparename(sp, sp->cnext))
-                        warning("Duplicate entry for student: %s, %s.",
+                        warning("Duplicate entry for student: %s, %s.", 2,
                                 sp->surname, sp->name);
                 sp = sp->cnext;
         }

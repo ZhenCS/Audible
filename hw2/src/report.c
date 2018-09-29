@@ -7,6 +7,7 @@
 #include "global.h"
 #include "gradedb.h"
 #include "stats.h"
+#include "report.h"
 
 #ifdef MSDOS
 #include <time.h>
@@ -15,7 +16,43 @@
 #include <time.h>
 #endif
 
-reportparams(fd, fn, c)
+void histo(FILE *fd, int bins[50], float min, float max, int cnt)
+{
+    int row, col, cmax; //oct
+    /*
+     * Determine the bin with the most tallies.
+     */
+    if(cnt < EPSILON) {
+      cnt = 1;  /* Don't divide by zero */
+    }
+    cmax = 0;
+    for(col = 0; col < 50; col++)
+      if(bins[col] > cmax) cmax = bins[col];
+    /*
+     * Now display the histogram.
+     */
+    for(row = 20; row >= 0; row--) {
+      if(row == 20)
+        fprintf(fd, "        ");
+      else if(row%4 == 3) {
+        fprintf(fd, "%5.1f%% |", (float)(100*cmax/cnt)*(row+1)/20);
+      } else {
+        fprintf(fd, "       |");
+      }
+      for(col = 0; col < 50; col++) {
+        if(20*bins[col] > row*cmax)
+          fprintf(fd, "%s", (row==20)?"^":"*");
+        else
+          fprintf(fd, " ");
+      }
+      fprintf(fd, "\n");
+    }
+    fprintf(fd, "    0%% -+------------------------------------------------+\n");
+    fprintf(fd, "     %6.2f                                         %6.2f\n\n",
+            min, max);
+}
+
+void reportparams(fd, fn, c)
 FILE *fd;
 char *fn;
 Course *c;
@@ -34,7 +71,7 @@ Course *c;
         fprintf(fd, "\n");
 }
 
-reportfreqs(fd, s)
+void reportfreqs(fd, s)
 FILE *fd;
 Stats *s;
 {
@@ -78,10 +115,7 @@ Stats *s;
         fprintf(fd, "\n");
 }
 
-float interpolatequantile(fp, n, q)
-Freqs *fp;
-int n;
-float q;
+float interpolatequantile( Freqs *fp, int n, float q)
 {
   float pq, nq, ps, ns, qdiff, sdiff, s;
 
@@ -114,14 +148,14 @@ float q;
 float quantiles[] = { 10.0, 25.0, 50.0, 75.0, 90.0 };
 float scores[]    = {  0.0,  0.0,  0.0,  0.0,  0.0 };
 
-reportquantilesummaries(fd, s)
+void reportquantilesummaries(fd, s)
 FILE *fd;
 Stats *s;
 {
   Classstats *csp;
   Sectionstats *ssp;
   int i, n;
-  float q, r, min, max;
+  float r, min, max;//q
 
   fprintf(fd, "QUANTILE SUMMARIES\n\n");
         for(csp = s->cstats; csp != NULL; csp = csp->next) {
@@ -132,7 +166,7 @@ Stats *s;
                                              quantiles[i]);
            min = scores[0];
            max = scores[n-1];
-           for(i = 0; i < sizeof(quantiles)/sizeof(*quantiles); i++) {
+           for(unsigned int i = 0; i < sizeof(quantiles)/sizeof(*quantiles); i++) {
              fprintf(fd, "   ");
              fprintf(fd, "%6.2f  ", quantiles[i]);
              fprintf(fd, "%6.2f  ", scores[i]);
@@ -140,7 +174,7 @@ Stats *s;
                r = (scores[i] - min) / (max - min);
                fprintf(fd, "%6.2f", r);
              } else {
-               fprintf(fd, "***.**", r);
+               fprintf(fd, "%3.2f", r);
              }
              fprintf(fd, "\n");
            }
@@ -154,7 +188,7 @@ Stats *s;
                                                 quantiles[i]);
               min = scores[0];
               max = scores[n-1];
-              for(i = 0; i < sizeof(quantiles)/sizeof(*quantiles); i++) {
+              for(unsigned int i = 0; i < sizeof(quantiles)/sizeof(*quantiles); i++) {
                 fprintf(fd, "   ");
                 fprintf(fd, "%6.2f  ", quantiles[i]);
                 fprintf(fd, "%6.2f  ", scores[i]);
@@ -162,7 +196,7 @@ Stats *s;
                   r = (scores[i] - min) / (max - min);
                   fprintf(fd, "%6.2f", r);
                 } else {
-                  fprintf(fd, "***.**", r);
+                  fprintf(fd, "%3.2f", r);
                 }
                 fprintf(fd, "\n");
               }
@@ -173,7 +207,7 @@ Stats *s;
         fprintf(fd, "\n");
 }
 
-reportquantiles(fd, s)
+void reportquantiles(fd, s)
 FILE *fd;
 Stats *s;
 {
@@ -197,7 +231,7 @@ Stats *s;
                 fprintf(fd, "(%6.2f,%6.2f)", fp->score,
                         (float)fp->numless * 100.0/csp->tallied);
               } else {
-                fprintf(fd, "(%6.2f,***.**)", fp->score,
+                fprintf(fd, "(%6.2f,%3.2f)", fp->score,
                         (float)fp->numless * 100.0/csp->tallied);
               }
            }
@@ -218,7 +252,7 @@ Stats *s;
                     fprintf(fd, "(%6.2f,%6.2f)", fp->score,
                             (float)fp->numless * 100.0/ssp->tallied);
                  } else {
-                    fprintf(fd, "(%6.2f,***.**)", fp->score,
+                    fprintf(fd, "(%6.2f,%3.2f)", fp->score,
                             (float)fp->numless * 100.0/ssp->tallied);
                  }
               }
@@ -229,7 +263,7 @@ Stats *s;
         fprintf(fd, "\n");
 }
 
-reportmoments(fd, s)
+void reportmoments(fd, s)
 FILE *fd;
 Stats *s;
 {
@@ -256,11 +290,12 @@ Stats *s;
         fprintf(fd, "\n");
 }
 
-reportscores(fd, c, nm)
+void reportscores(fd, c, nm)
 FILE *fd;
 Course *c;
+int nm;
 {
-        Assignment *ap;
+        //Assignment *ap;
         Student *stp;
         Score *rscp, *nscp;
 
@@ -290,13 +325,14 @@ Course *c;
         fprintf(fd, "\n");
 }
 
-reportcomposites(fd, c, nm)
+void reportcomposites(fd, c, nm)
 FILE *fd;
 Course *c;
+int nm;
 {
         Student *stp;
-        Score *scp;
-        Assignment *ap;
+        //Score *scp;
+        //Assignment *ap;
 
         fprintf(fd, "STUDENT COMPOSITE SCORES\n\n");
         for(stp = c->roster; stp != NULL; stp = stp->cnext) {
@@ -314,13 +350,13 @@ Course *c;
  * the vertical axis to a scale of 0 to 20.
  */
 
-reporthistos(fd, c, s)
+void reporthistos(fd, c, s)
 FILE *fd;
 Course *c;
 Stats *s;
 {
         Classstats *csp;
-        Sectionstats *ssp;
+        //Sectionstats *ssp;
         Student *stp;
         Freqs *fp;
         int col, pct, cnt;
@@ -378,51 +414,13 @@ Stats *s;
         }
 }
 
-histo(fd, bins, min, max, cnt)
-FILE *fd;
-int bins[50], cnt;
-float min, max;
-{
-    int row, col, pct, cmax;
-    /*
-     * Determine the bin with the most tallies.
-     */
-    if(cnt < EPSILON) {
-      cnt = 1;  /* Don't divide by zero */
-    }
-    cmax = 0;
-    for(col = 0; col < 50; col++)
-      if(bins[col] > cmax) cmax = bins[col];
-    /*
-     * Now display the histogram.
-     */
-    for(row = 20; row >= 0; row--) {
-      if(row == 20)
-        fprintf(fd, "        ");
-      else if(row%4 == 3) {
-        fprintf(fd, "%5.1f%% |", (float)(100*cmax/cnt)*(row+1)/20);
-      } else {
-        fprintf(fd, "       |");
-      }
-      for(col = 0; col < 50; col++) {
-        if(20*bins[col] > row*cmax)
-          fprintf(fd, "%s", (row==20)?"^":"*");
-        else
-          fprintf(fd, " ");
-      }
-      fprintf(fd, "\n");
-    }
-    fprintf(fd, "    0%% -+------------------------------------------------+\n");
-    fprintf(fd, "     %6.2f                                         %6.2f\n\n",
-            min, max);
-}    
 
-void
-reporttabs(FILE *fd, Course *c, int nm)
+
+void reporttabs(FILE *fd, Course *c) //int nm
 {
         Assignment *ap;
         Student *stp;
-        Score *rscp, *nscp;
+        Score *rscp;//, *nscp;
 
         fprintf(fd, "STUDENT INDIVIDUAL SCORES\n\n");
         fprintf(fd, "STUDENT\t");

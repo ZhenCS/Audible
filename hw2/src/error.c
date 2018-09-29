@@ -4,43 +4,60 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 int errors;
 int warnings;
 int dbflag = 1;
 
-void fatal(fmt, a1, a2, a3, a4, a5, a6)
-char *fmt, *a1, *a2, *a3, *a4, *a5, *a6;
+void fatal(char *fmt,int i, ...)
 {
+        va_list valist;
+        va_start(valist, i);
+
         fprintf(stderr, "\nFatal error: ");
-        fprintf(stderr, fmt, a1, a2, a3, a4, a5, a6);
+        vfprintf(stderr, fmt, valist);
         fprintf(stderr, "\n");
+
+        va_end(valist);
         exit(1);
 }
 
-void error(fmt, a1, a2, a3, a4, a5, a6)
-char *fmt, *a1, *a2, *a3, *a4, *a5, *a6;
+void error(char *fmt,int i, ...)
 {
+        va_list valist;
+        va_start(valist, i);
+
         fprintf(stderr, "\nError: ");
-        fprintf(stderr, fmt, a1, a2, a3, a4, a5, a6);
+        vfprintf(stderr, fmt, valist);;
         fprintf(stderr, "\n");
         errors++;
+
+        va_end(valist);
 }
 
-void warning(fmt, a1, a2, a3, a4, a5, a6)
-char *fmt, *a1, *a2, *a3, *a4, *a5, *a6;
+void warning(char *fmt,int i, ...)
 {
+        va_list valist;
+        va_start(valist, i);
+
         fprintf(stderr, "\nWarning: ");
-        fprintf(stderr, fmt, a1, a2, a3, a4, a5, a6);
+        vfprintf(stderr, fmt, valist);
         fprintf(stderr, "\n");
         warnings++;
+
+        va_end(valist);
 }
 
-void debug(fmt, a1, a2, a3, a4, a5, a6)
-char *fmt, *a1, *a2, *a3, *a4, *a5, *a6;
+void debug(char *fmt,int i, ...)
 {
+        va_list valist;
+        va_start(valist, i);
+
         if(!dbflag) return;
         fprintf(stderr, "\nDebug: ");
-        fprintf(stderr, fmt, a1, a2, a3, a4, a5, a6);
+        vfprintf(stderr, fmt, valist);
         fprintf(stderr, "\n");
+
+        va_end(valist);
 }
