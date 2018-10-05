@@ -6,6 +6,7 @@
 #include "sort.h"
 #include "stats.h"
 #include "report.h"
+#include "normal.h"
 
 #define TEST_FILE "cse307.dat"
 #define COLLATED_REF "rsrc/cse307.collated"
@@ -24,7 +25,7 @@ Test(basic_suite, read_file_test) {
 
 Test(basic_suite, stats_test) {
     Course *c;
-    //Stats *s;
+    Stats *s;
     c = readfile(TEST_FILE);
     cr_assert_eq(errors, 0, "There were errors reported when reading test data.\n");
     cr_assert_neq(c, NULL, "NULL pointer returned from readfile().\n");
@@ -51,7 +52,7 @@ Test(basic_suite, collate_test) {
 
 Test(basic_suite, tabsep_test) {
     Course *c;
-    //Stats *s;
+    Stats *s;
     c = readfile(TEST_FILE);
     cr_assert_eq(errors, 0, "There were errors reported when reading test data.\n");
     cr_assert_neq(c, NULL, "NULL pointer returned from readfile().\n");
