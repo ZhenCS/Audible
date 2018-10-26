@@ -200,3 +200,121 @@ Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init,
 //DO NOT DELETE THESE COMMENTS
 //############################################
 
+Test(sf_memsuite_student, malloc_odd_request_size, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	void *x = sf_malloc(0);
+	void *y = sf_malloc(1);
+	void *z = sf_malloc(15);
+
+	sf_header *yhp = (sf_header *)((char*)y - sizeof(sf_footer));
+	sf_header *zhp = (sf_header *)((char*)z - sizeof(sf_footer));
+
+	cr_assert_null(x, "x is not NULL!");
+	cr_assert((yhp->info.block_size<<4) == 32, "Malloc'ed block size not what was expected!");
+	cr_assert(yhp->info.requested_size == 1, "Malloc'ed request size not what was expected!");
+	cr_assert((zhp->info.block_size<<4) == 32, "Malloc'ed block size not what was expected!");
+	cr_assert(zhp->info.requested_size == 15, "Malloc'ed request size not what was expected!");
+
+	assert_free_block_count(1);
+	assert_free_list_count(PAGE_SZ - sizeof(sf_prologue) - sizeof(sf_epilogue) - MIN_BLOCK_SIZE * 2, 1);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
+
+Test(sf_memsuite_student, free_coalesce_successive, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	/* void *w = */ sf_malloc(sizeof(long));
+	void *x = sf_malloc(sizeof(double) * 11);
+	void *y = sf_malloc(sizeof(char));
+	/* void *z = */ sf_malloc(sizeof(int));
+
+	sf_free(x);
+	sf_free(y);
+
+	assert_free_block_count(2);
+	assert_free_list_count(128, 1);
+	assert_free_list_count(3856, 1);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
+
+Test(sf_memsuite_student, free_coalesce_triple, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	void *w =  sf_malloc(sizeof(long));
+	void *x = sf_malloc(sizeof(double) * 11);
+	void *y = sf_malloc(sizeof(char));
+	void *z = sf_malloc(sizeof(int));
+
+	sf_free(w);
+	sf_free(y);
+	sf_free(x);
+
+	assert_free_block_count(2);
+	assert_free_list_count(160, 1);
+	assert_free_list_count(3856, 1);
+
+	sf_free(z);
+
+	assert_free_block_count(1);
+	assert_free_list_count(4048, 1);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
+
+Test(sf_memsuite_student, best_fit, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	void *a = 		sf_malloc(32);
+	/* void *b = */ sf_malloc(sizeof(double) * 11);
+	void *w = 		sf_malloc(sizeof(long));
+	/* void *x = */	sf_malloc(sizeof(double) * 11);
+	void *y = 		sf_malloc(sizeof(char));
+	/* void *z = */ sf_malloc(32);
+
+	sf_free(a);
+	sf_free(w);
+	sf_free(y);
+
+	void *c =  sf_malloc(sizeof(int));
+
+	cr_assert(c == y, "Allocated the block in the wrong free block!");
+	assert_free_block_count(3);
+	assert_free_list_count(32, 1);
+	assert_free_list_count(48, 1);
+	assert_free_list_count(3696, 1);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
+
+Test(sf_memsuite_student, circular_linked_free_list, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+
+	cr_assert(&sf_free_list_head == sf_free_list_head.next, "Free list head is not circular!");
+	cr_assert(&sf_free_list_head == sf_free_list_head.prev, "Free list head is not circular!");
+
+	void *x = sf_malloc(sizeof(int));
+	sf_free_list_node *node1 = sf_free_list_head.next;
+	int freeSize1 = PAGE_SZ - sizeof(sf_prologue) - sizeof(sf_epilogue) - MIN_BLOCK_SIZE;
+
+	cr_assert(sf_free_list_head.prev == node1 && sf_free_list_head.next == node1, "Free list head is not circular!");
+	cr_assert(sf_free_list_head.next->size == freeSize1, "Free list is not in the correct order!");
+
+	sf_malloc(sizeof(int));
+	sf_free_list_node *node2 = sf_free_list_head.next;
+	int freeSize2 = PAGE_SZ - sizeof(sf_prologue) - sizeof(sf_epilogue) - MIN_BLOCK_SIZE *2;
+
+	cr_assert(sf_free_list_head.prev == node1 && sf_free_list_head.next == node2, "Free list head is not circular!");
+	cr_assert(node1->prev == node2 && node1->next == &sf_free_list_head, "Free list is not circular!");
+	cr_assert(node2->prev == &sf_free_list_head && node2->next == node1, "Free list is not circular!");
+	cr_assert(sf_free_list_head.next->size == freeSize2, "Free list is not in the correct order!");
+
+	sf_free(x);
+	sf_free_list_node *node3 = sf_free_list_head.next;
+
+	cr_assert(sf_free_list_head.prev == node1 && sf_free_list_head.next == node3, "Free list head is not circular!");
+	cr_assert(node1->prev == node2 && node1->next == &sf_free_list_head, "Free list is not circular!");
+	cr_assert(node2->prev == node3 && node2->next == node1, "Free list is not circular!");
+	cr_assert(node3->prev == &sf_free_list_head && node3->next == node2, "Free list is not circular!");
+	cr_assert(sf_free_list_head.next->size == MIN_BLOCK_SIZE, "Free list is not in the correct order!");
+
+	assert_free_block_count(2);
+	assert_free_list_count(MIN_BLOCK_SIZE, 1);
+	assert_free_list_count(freeSize2, 1);
+
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
