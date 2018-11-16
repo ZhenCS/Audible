@@ -1,13 +1,19 @@
 #include <string.h>
-
+#include <stdio.h>
 #include "imprimer.h"
 #include "hw4.h"
 
-CONVERSIONPATH *getConversionPath(char *fileType, char *printerType){
+void initConversions(CONVERSION **conversions){
+  for(int i = 0; i < MAX_CONVERSIONS; i++){
+    conversions[i] = 0;
+  }
+}
+
+CONVERSIONPATH *getConversionPath(char *fileType, char *printerType, int loops){
   TYPE *type = getType(fileType);
   CONVERSION *conversion = type->conversions[0];
-  //printf("fileType: %s printerType: %s\n", fileType, printerType);
-  if(conversion == NULL || !strcmp(fileType, printerType)){
+  //printf("fileType: %s printerType: %s loop: %i\n", fileType, printerType, loops);
+  if(conversion == NULL || !strcmp(fileType, printerType) || loops <= 0){
     //printf("fileType %s has 0 conversions \n", fileType);
     return NULL;
   }
@@ -20,11 +26,14 @@ CONVERSIONPATH *getConversionPath(char *fileType, char *printerType){
   //printf("There is no conversion from %s to %s\n", fileType, printerType);
   for(int i = 0; i < MAX_CONVERSIONS && type->conversions[i] != NULL; i++){
     conversion = type->conversions[i];
-    CONVERSIONPATH *path = getConversionPath(conversion->type, printerType);
+    loops--;
+    CONVERSIONPATH *path = getConversionPath(conversion->type, printerType, loops);
 
     if(path != NULL){
-      //printf("%s\n", conversion->program);
-      return (newConversionPath(conversion)->next = path);
+      //printf("%s\n", conversion->type);
+      CONVERSIONPATH *oldPath = newConversionPath(conversion);
+      oldPath->next = path;
+      return oldPath;
     }
   }
 
@@ -114,15 +123,16 @@ CONVERSION *getConversion(char *type1, char *type2){
 }
 
 char **getConversionArgs(CONVERSION *conversion){
-  char *args = strdup(conversion->args);
-  char **argv = malloc(sizeof(char *));
+  char **argv = malloc(sizeof(char *) * 2);
   argv[0] = strdup(conversion->program);
+  argv[1] = NULL;
 
-  if(args == NULL)
-    return NULL;
+  if(conversion->args == NULL)
+    return argv;
 
+  char *args = strdup(conversion->args);
   int length = 1;
-  char *token = strtok("args", " ");
+  char *token = strtok(args, " ");
   while(token != NULL){
     length++;
     argv = realloc(argv, sizeof(char *) * length);

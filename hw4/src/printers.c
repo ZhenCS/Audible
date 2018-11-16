@@ -76,7 +76,7 @@ PRINTER_SET getPrinterSet(char *printers){
         strcat(error, printerName);
         strcat(error, " is not defined.");
         errorMessage(error);
-        return -1;
+        return 0;
       }else{
         printerSet |= 1 << printer->id;
       }
@@ -153,6 +153,19 @@ PRINTER *getEligiblePrinter(JOB *job){
     printer = NULL;
   }
 
+  if(printer == NULL){//if no printer is provided from the above for loop, this loop searches for a conversion path
+    for(int i = 0; i < MAX_PRINTERS && printerArray[i] != NULL; i++){
+      printer = printerArray[i];
+      if(printer->enabled && job->eligible_printers & (0x1 << printer->id)){
+        path = getConversionPath(type->type, printer->type, MAX_CONVERSIONS);
+        if(path != NULL)
+          break;
+      }
+
+      printer = NULL;
+    }
+  }
+
   if(printer == NULL){
     for(int i = 0; i < MAX_PRINTERS && printerArray[i] != NULL; i++){// find a printer that does not need converting
       printer = printerArray[i];
@@ -166,17 +179,5 @@ PRINTER *getEligiblePrinter(JOB *job){
     }
   }
 
-  if(printer == NULL){//if no printer is provided from the above for loop, this loop searches for a conversion path
-    for(int i = 0; i < MAX_PRINTERS && printerArray[i] != NULL; i++){
-      printer = printerArray[i];
-      if(printer->enabled && job->eligible_printers & (0x1 << printer->id)){
-        path = getConversionPath(type->type, printer->type);
-        if(path != NULL)
-          break;
-      }
-
-      printer = NULL;
-    }
-  }
   return printer;
 }

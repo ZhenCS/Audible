@@ -23,17 +23,25 @@ sigset_t mask_all, prev_all;
 void printHandler(int sig){
   if(sig == SIGCHLD){
     int status = -1;
-    int pid = waitpid(-1, &status, WNOHANG);
+    int pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
     if(WIFEXITED(status)){
-      //printf("child terminated normally %d\n", status);
+      int exitStatus = WEXITSTATUS(status);
+      if(exitStatus == EXIT_SUCCESS){
+        JOB* job = getJobByPID(pid)->job;
+        completeJob(job);
+        freePrinter(job->chosen_printer->name);
+      }else if(exitStatus == EXIT_FAILURE){
+        JOB* job = getJobByPID(pid)->job;
+        abortJob(job);
+        freePrinter(job->chosen_printer->name);
+      }
+    }else if(WIFSTOPPED(status)){
       JOB* job = getJobByPID(pid)->job;
-      completeJob(job);
-      freePrinter(job->chosen_printer->name);
-    }else if(status == -1){
-
-    }
-    else{
-      //printf("child terminated abnormally %d\n", status);
+      pauseJob(job);
+    }else if(WIFCONTINUED(status)){
+      JOB* job = getJobByPID(pid)->job;
+      resumeJob(job);
+    }else if(WIFSIGNALED(status)){
       JOB* job = getJobByPID(pid)->job;
       abortJob(job);
       freePrinter(job->chosen_printer->name);
@@ -41,15 +49,7 @@ void printHandler(int sig){
   }
 }
 
-/*void forkit(){
-  pid_t a;
-  a = fork();
-  if(a == 0){
-    printf("child pid is %i\n", getpid());
-    exit(EXIT_SUCCESS);
-  }
-}*/
-
+FILE *outFile;
 int main(int argc, char *argv[])
 {
   if(signal(SIGCHLD, printHandler) == SIG_ERR){
@@ -57,125 +57,174 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
+  batchMode(argc, argv);
+
   char *input;
   while(1){
     if((input = readline("imp> ")) != NULL){
+        runCommand(input);
 
-      char *flag1 = strtok(input, " ");
-      if(flag1 != NULL){
-        if(!strcmp(flag1, "help")){
-            usage();
-        }
-        if(!strcmp(flag1, "type")){
-          newExtension(strtok(NULL, " "));
-        }
-        if(!strcmp(flag1, "printer")){
-
-          char *name = strtok(NULL, " ");
-          char *type = strtok(NULL, " ");
-
-          newPrinter(name, type);
-        }
-        if(!strcmp(flag1, "printers")){
-            printerStatus();
-        }
-        if(!strcmp(flag1, "jobs")){
-            removeJobs();
-            jobStatus();
-        }
-        if(!strcmp(flag1, "pause")){
-          char *jobID = strtok(NULL, " ");
-
-          if(jobID != NULL){
-            int id = atoi(jobID);
-            if(id == 0 && strcmp(jobID, "0") != 0){
-              errorMessage("Correct Use: pause jobID");
-            }else{
-
-              JOB *job = getJobByID(id)->job;
-              killpg(job->pgid, SIGTSTP);
-              pauseJob(job);
-            }
-          }
-        }
-        if(!strcmp(flag1, "resume")){
-          char *jobID = strtok(NULL, " ");
-
-          if(jobID != NULL){
-            int id = atoi(jobID);
-            if(id == 0 && strcmp(jobID, "0") != 0){
-              errorMessage("Correct Use: resume jobID");
-            }else{
-              JOB *job = getJobByID(id)->job;
-              killpg(job->pgid, SIGCONT);
-              resumeJob(job);
-            }
-          }
-        }
-        if(!strcmp(flag1, "cancel")){
-          char *jobID = strtok(NULL, " ");
-
-          if(jobID != NULL){
-            int id = atoi(jobID);
-            if(id == 0 && strcmp(jobID, "0") != 0){
-              errorMessage("Correct Use: cancel jobID");
-            }else{
-              JOB *job = getJobByID(id)->job;
-              killpg(job->pgid, SIGTERM);
-              //abortJob(job);
-            }
-          }
-        }
-        if(!strcmp(flag1, "conversion")){
-          char *type1 = strtok(NULL, " ");
-          char *type2 = strtok(NULL, " ");
-          char *program = strtok(NULL, " ");
-          char *args = strtok(NULL, "\n");
-
-          newConversion(type1, type2, program, args);
-        }
-        if(!strcmp(flag1, "print")){
-          char *file = strtok(NULL, " ");
-          char *printers = strtok(NULL, "\n");
-
-          print(file, printers);
-        }
-        if(!strcmp(flag1, "disable")){
-            disablePrinter(strtok(NULL, " "));
-        }
-        if(!strcmp(flag1, "enable")){
-            enablePrinter(strtok(NULL, " "));
-        }
-        if(!strcmp(flag1, "quit")){
-            exit(EXIT_SUCCESS);
-        }
-        if(!strcmp(flag1, "test")){
-          char *file = strtok(NULL, " ");
-          int pid = print(file, NULL);
-          printf("pid recieved from print %i\n", pid);
-
-          sleep(1);
-          killpg(pid, SIGSTOP);
-
-        }
         free(input);
-
-        /*sigset_t mask_all, prev_all;
-        sigfillset(&mask_all);
-        sigemptyset(&prev_all);
-
-        sigprocmask(SIG_BLOCK, &mask_all, NULL);
-        printf("FORKING WHICH SOULD NOT WORK %s\n", "!");*/
         runJobs();
         removeJobs();
-
-        //sigprocmask(SIG_UNBLOCK, &mask_all, NULL);
-      }
     }
   }
   exit(EXIT_SUCCESS);
 }
 
+void batchMode(int argc, char **argv){
+  if(argc > 1){
+
+    int oFlag = getFlag("-o", argc, argv);
+    if(oFlag >= argc - 1){
+      errorMessage("No output file specified");
+      exit(EXIT_FAILURE);
+    }else if(oFlag > 0){
+      char *file = argv[oFlag + 1];
+      if((outFile = freopen(file, "w", stdout)) == NULL){
+        errorMessage("Unable to open input file.");
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    int iFlag = getFlag("-i", argc, argv);
+
+    if(iFlag >= argc - 1){
+      errorMessage("No input file specified");
+      exit(EXIT_FAILURE);
+    }else if(iFlag > 0){
+      char *file = argv[iFlag + 1];
+
+      FILE *script;
+      if((script = fopen(file, "r")) == NULL){
+        errorMessage("Unable to open input file.");
+        exit(EXIT_FAILURE);
+      }
+
+
+      char line[MAX_CHARS];
+      while(fgets(line, MAX_CHARS, script) != NULL){
+        char *input = strtok(line, "\n");
+
+        if(input != NULL){
+          printf("imp> %s\n", line);
+          runCommand(line);
+        }
+      }
+
+      fclose(script);
+    }
+  }
+}
+
+int getFlag(char * flag, int argc, char **argv){
+
+  for(int i = 0; i < argc; i++)
+    if(!strcmp(flag, argv[i]))
+      return i;
+
+  return -1;
+}
+
+void runCommand(char* input){
+  char *flag1 = strtok(input, " ");
+  if(flag1 != NULL){
+    if(!strcmp(flag1, "help")){
+        usage();
+    }
+    if(!strcmp(flag1, "type")){
+      newExtension(strtok(NULL, " "));
+    }
+    if(!strcmp(flag1, "printer")){
+
+      char *name = strtok(NULL, " ");
+      char *type = strtok(NULL, " ");
+
+      PRINTER *printer = newPrinter(name, type);
+      printerMessage(printer);
+
+    }
+    if(!strcmp(flag1, "printers")){
+        printerStatus();
+    }
+    if(!strcmp(flag1, "jobs")){
+        removeJobs();
+        jobStatus();
+    }
+    if(!strcmp(flag1, "pause")){
+      char *jobID = strtok(NULL, " ");
+
+      if(jobID != NULL){
+        int id = atoi(jobID);
+        if(id == 0 && strcmp(jobID, "0") != 0){
+          errorMessage("Correct Use: pause jobID");
+        }else{
+
+          JOB *job = getJobByID(id)->job;
+          if(job != NULL)
+            killpg(job->pgid, SIGTSTP);
+          //pauseJob(job);
+        }
+      }
+    }
+    if(!strcmp(flag1, "resume")){
+      char *jobID = strtok(NULL, " ");
+
+      if(jobID != NULL){
+        int id = atoi(jobID);
+        if(id == 0 && strcmp(jobID, "0") != 0){
+          errorMessage("Correct Use: resume jobID");
+        }else{
+          JOB *job = getJobByID(id)->job;
+          if(job != NULL)
+            killpg(job->pgid, SIGCONT);
+          //resumeJob(job);
+        }
+      }
+    }
+    if(!strcmp(flag1, "cancel")){
+      char *jobID = strtok(NULL, " ");
+
+      if(jobID != NULL){
+        int id = atoi(jobID);
+        if(id == 0 && strcmp(jobID, "0") != 0){
+          errorMessage("Correct Use: cancel jobID");
+        }else{
+          JOB *job = getJobByID(id)->job;
+          if(job != NULL)
+            killpg(job->pgid, SIGTERM);
+          //abortJob(job);
+        }
+      }
+    }
+    if(!strcmp(flag1, "conversion")){
+      char *type1 = strtok(NULL, " ");
+      char *type2 = strtok(NULL, " ");
+      char *program = strtok(NULL, " ");
+      char *args = strtok(NULL, "\n");
+
+      newConversion(type1, type2, program, args);
+    }
+    if(!strcmp(flag1, "print")){
+      char *file = strtok(NULL, " ");
+      char *printers = strtok(NULL, "\n");
+
+      print(file, printers);
+    }
+    if(!strcmp(flag1, "disable")){
+        disablePrinter(strtok(NULL, " "));
+    }
+    if(!strcmp(flag1, "enable")){
+        enablePrinter(strtok(NULL, " "));
+    }
+    if(!strcmp(flag1, "quit")){
+        if(outFile != NULL)
+          fclose(outFile);
+
+        exit(EXIT_SUCCESS);
+    }
+  }
+}
 
 
 
@@ -189,12 +238,11 @@ int print(char *file, char *printers){
   }
 
   PRINTER_SET printerSet = getPrinterSet(printers);
-  if(printerSet < 0)
+  if(printerSet == 0)
     return 0;
 
-  //sigprocmask(SIG_BLOCK, &mask_all, &prev_all);
-  JOB *job = newJob(name, type, getpid(), printerSet)->job;
-  //sigprocmask(SIG_BLOCK, &prev_all, NULL);
+  JOB *job = newJob(name, type, 0, printerSet)->job;
+  jobMessage(job);
 
   PRINTER *chosenPrinter = getEligiblePrinter(job);
   if(chosenPrinter != NULL)

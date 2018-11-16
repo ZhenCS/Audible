@@ -1,8 +1,9 @@
 #ifndef VALIDARGS_H
 #define VALIDARGS_H
 
-#define MAX_TYPES 32
-#define MAX_CONVERSIONS 32
+#define MAX_CHARS 255 //for batch mode
+#define MAX_TYPES 31
+#define MAX_CONVERSIONS 63
 
 
 typedef struct conversion {
@@ -33,8 +34,9 @@ JOBNODE job_head;
 TYPE *typeArray[MAX_TYPES];
 PRINTER *printerArray[MAX_PRINTERS];
 
-void usage();
-
+void batchMode(int argc, char **argv);
+int getFlag(char * flag, int argc, char **argv);
+void runCommand(char* input);
 int print(char *file, char *printers);
 
 //types.c
@@ -43,6 +45,7 @@ TYPE *addType(TYPE *type);
 TYPE *getType(char *type);
 
 //conversions.c
+void initConversions(CONVERSION **conversions); //for TYPES
 CONVERSION *newConversion(char *type1, char *type2, char *program, char *args);
 CONVERSION *addConversion(TYPE *type, CONVERSION *conversion);
 CONVERSION *getConversion(char *type1, char *type2);
@@ -67,7 +70,7 @@ void removeJobs();
 PRINTER *getEligiblePrinter(JOB *job);
 
 //conversions.c
-CONVERSIONPATH *getConversionPath(char *fileType, char *printerType);
+CONVERSIONPATH *getConversionPath(char *fileType, char *printerType, int loops);
 CONVERSIONPATH *newConversionPath(CONVERSION *conversion);
 
 char **getPrinterArgs();
@@ -101,6 +104,7 @@ int runJobProcess(char *file, JOB *job, PRINTER *printername);
 
 
 //helpers.c
+void usage();
 int arrlen(CONVERSION *array[], int max);
 char *getFile(JOB *job);
 #endif

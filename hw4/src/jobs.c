@@ -13,7 +13,7 @@
 #include "hw4.h"
 
 JOBNODE *newJob(char *name, char *type, int pgid, PRINTER_SET set){
-  if(name == NULL || type == NULL || set == 0 || pgid == 0)
+  if(name == NULL || type == NULL || set == 0)
     return NULL;
 
   static int index = 0;
@@ -130,129 +130,116 @@ int runJob(char *file, JOB *job, char *printername){
 }
 
 
-
 int runJobProcess(char *file, JOB *job, PRINTER *chosenPrinter){
+  sigset_t mask_child, prev_all;
+  sigaddset(&mask_child, SIGCHLD);
+  sigemptyset(&prev_all);
+  sigprocmask(SIG_BLOCK, &mask_child, &prev_all);
+
   pid_t pid;
   if((pid = fork()) == 0){
     setpgid(getpid(), getpid());
-    /*int i = 0;
-    while(1){
-      printf("i = %i\n", i);
-      sleep(2);
-      i++;
-    }*/
-    /*int fd;
-    if((fd = open("src/text.txt", O_RDONLY)) < 0){
-      errorMessage("Unable to open file.");
-          exit(EXIT_FAILURE);
-    }
 
-    int printerfd = imp_connect_to_printer(chosenPrinter, PRINTER_NORMAL);
-    dup2(fd, 0);
-    dup2(printerfd, 1);
-    char **argv = getPrinterArgs();
-    printf("%s\n", "EXECUTING");
-    if(execv(argv[0], argv) < 0){
-      errorMessage("Unable to run conversion program.");
-      exit(EXIT_FAILURE);
-    }
-    printf("%s\n", "DONE EXECUTING");*/
-
-
-
-    exit(EXIT_SUCCESS);
-    /*CONVERSIONPATH *path = getConversionPath(job->file_type, chosenPrinter->type);
-    //open file
     int fd;
     if((fd = open(file, O_RDONLY)) < 0){
       errorMessage("Unable to open file.");
-          exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE);
     }
 
-    dup2(fd, 0);
+    int parent2child[2];
+    int child2parent[2];
+    if(pipe(parent2child) != 0 || pipe(child2parent) != 0){
+      errorMessage("Unable to create pipes.");
+      exit(EXIT_FAILURE);
+    }
+
+
+    pid_t pid2;
     char **argv;
-    if(path != NULL){
-      int parent2child[2];
-      int child2parent[2];
-      if(pipe(parent2child) != 0 || pipe(child2parent) != 0){
-        errorMessage("Unable to create pipe.");
+    CONVERSIONPATH *path = getConversionPath(job->file_type, chosenPrinter->type, MAX_CONVERSIONS);
+    CONVERSIONPATH *head = path;
+    close(parent2child[1]);
+
+    if(path == NULL)
+      dup2(fd, 0);
+
+    while(path != NULL){
+      if((pid2 = fork()) == 0){
+        sleep(2);
+        if(path == head){
+          dup2(fd, parent2child[0]);
+          close(fd);
+        }
+
+        dup2(parent2child[0], 0); //standard input
+        dup2(child2parent[0], parent2child[0]);
+        dup2(child2parent[1], 1); //standard output
+
+        //printf("FILE HAS BEEN CONVERTED TO %s\n", path->conversion->type);
+        close(parent2child[0]);
+        close(child2parent[0]);
+        close(child2parent[1]);
+        argv = getConversionArgs(path->conversion);
+        if(execv(argv[0], argv) < 0){
+          errorMessage("Unable to run conversion program.");
+          exit(EXIT_FAILURE);
+        }
+
+        exit(EXIT_FAILURE);
+      }else if(pid2 < 0){
+        errorMessage("Unable to fork master process.");
         exit(EXIT_FAILURE);
       }
-
-      while(path != NULL){
-        argv = getConversionArgs(path->conversion);
-
-        pid_t pid2;
-        if((pid2 = fork()) == 0){
-          dup2(parent2child[0], 0);
-
-          if(path->next == NULL){
-            int printerfd = imp_connect_to_printer(chosenPrinter, PRINTER_NORMAL);
-            dup2(printerfd, 1);
-          }else dup2(child2parent[1], 1);
-
-
-          if(execv(argv[0], argv) < 0){
-            errorMessage("Unable to run conversion program.");
+      else{
+        int status = -1;
+        waitpid(pid2, &status, 0);
+        if(WIFEXITED(status)){
+        int exitStatus = WEXITSTATUS(status);
+          if(exitStatus == EXIT_FAILURE){
+            errorMessage("A conversion process have terminated abnormally.");
             exit(EXIT_FAILURE);
           }
-
-          if(argv != NULL)
-            freeConversion(argv);
-
-          exit(1);
-        }else if(pid2 < 0){
-          errorMessage("Unable to fork.");
-          exit(EXIT_FAILURE);
-        }else{
-          dup2(fd, parent2child[1]);
-
-          int status;
-          waitpid(pid2, &status, 0);
-          if(!WIFEXITED(status)){
-            errorMessage("conversion program did not terminate normally.");
-            exit(EXIT_FAILURE);
-          }
-
-          if(path->next != NULL)
-            dup2(child2parent[0], fd);
-          else
-            dup2(child2parent[0], 0);
         }
 
         path = path->next;
+        if(path == NULL) dup2(child2parent[0], 0);
+      }//parent
+    }//while
+    close(parent2child[0]);
+    close(child2parent[0]);
+    close(child2parent[1]);
+
+    pid_t pid3;
+    if((pid3 = fork()) == 0){
+      int printerfd = imp_connect_to_printer(chosenPrinter, PRINTER_NORMAL);
+      dup2(printerfd, 1);
+      argv = getPrinterArgs();
+      if(execv(argv[0], argv) < 0){
+        errorMessage("Unable to connect to printer.");
+        exit(EXIT_FAILURE);
       }
-
-
-      if((pid = fork()) == 0){
-        argv = getPrinterArgs();
-        if(execv(argv[0], argv) < 0){
-          errorMessage("Unable to connect to printer.");
-          exit(EXIT_FAILURE);
-        }
-      }
-      close(parent2child[0]);
-      close(parent2child[1]);
-
-      close(child2parent[0]);
-      close(child2parent[1]);
+    }else if(pid3 < 0){
+      errorMessage("Unable to fork master process.");
+      exit(EXIT_FAILURE);
     }else{
-      if((pid = fork()) == 0){
-        argv = getPrinterArgs();
-        if(execv(argv[0], argv) < 0){
-          errorMessage("Unable to connect to printer.");
+      int status = -1;
+      waitpid(pid3, &status, 0);
+      if(WIFEXITED(status)){
+        int exitStatus = WEXITSTATUS(status);
+        if(exitStatus == EXIT_FAILURE){
+          errorMessage("Printer has terminated abnormally.");
           exit(EXIT_FAILURE);
         }
       }
     }
 
-    close(fd);
-    exit(EXIT_SUCCESS);*/
+    exit(EXIT_SUCCESS);
   }else if(pid < 0){
     errorMessage("Unable to fork master process.");
     exit(EXIT_FAILURE);
   }else{
     job->pgid = pid;
+    sigprocmask(SIG_SETMASK, &prev_all, NULL);
   }
 
   return pid;

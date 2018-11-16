@@ -7,6 +7,9 @@
 TYPE *newExtension(char *name){
   if(name == NULL)
     return NULL;
+  if(getType(name) != NULL){
+    errorMessage("Type already defined.");
+  }
 
   TYPE *type;
   if((type = (TYPE *)malloc(sizeof(TYPE))) == NULL){
@@ -14,6 +17,7 @@ TYPE *newExtension(char *name){
     return NULL;
   }
   type->type = strdup(name);
+  initConversions(type->conversions);
   addType(type);
   return type;
 }
