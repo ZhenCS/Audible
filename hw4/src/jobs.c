@@ -132,8 +132,9 @@ int runJob(char *file, JOB *job, char *printername){
 
 int runJobProcess(char *file, JOB *job, PRINTER *chosenPrinter){
   sigset_t mask_child, prev_all;
-  sigaddset(&mask_child, SIGCHLD);
+  sigemptyset(&mask_child);
   sigemptyset(&prev_all);
+  sigaddset(&mask_child, SIGCHLD);
   sigprocmask(SIG_BLOCK, &mask_child, &prev_all);
 
   pid_t pid;
@@ -165,7 +166,7 @@ int runJobProcess(char *file, JOB *job, PRINTER *chosenPrinter){
 
     while(path != NULL){
       if((pid2 = fork()) == 0){
-        sleep(2);
+        sleep(5);
         if(path == head){
           dup2(fd, parent2child[0]);
           close(fd);

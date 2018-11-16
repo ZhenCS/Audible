@@ -141,7 +141,8 @@ void runCommand(char* input){
       char *type = strtok(NULL, " ");
 
       PRINTER *printer = newPrinter(name, type);
-      printerMessage(printer);
+      if(printer != NULL)
+        printerMessage(printer);
 
     }
     if(!strcmp(flag1, "printers")){
@@ -242,6 +243,9 @@ int print(char *file, char *printers){
     return 0;
 
   JOB *job = newJob(name, type, 0, printerSet)->job;
+  if(job == NULL)
+    return 0;
+
   jobMessage(job);
 
   PRINTER *chosenPrinter = getEligiblePrinter(job);
