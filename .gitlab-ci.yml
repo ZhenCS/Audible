@@ -1,22 +1,13 @@
 image: hwrunner:latest
 variables:
     GIT_SSL_NO_VERIFY: "true"
-<<<<<<< HEAD
-    EXEC: grades
-    HW_DIR: hw2
-=======
     EXEC: imprimer
     HW_DIR: hw4
->>>>>>> HW4_CODE/master
 before_script:
     - make clean all -C ${HW_DIR}
 stages:
     - build
     - run
-<<<<<<< HEAD
-    - test
-=======
->>>>>>> HW4_CODE/master
 build:
     stage: build
     script:
@@ -24,12 +15,5 @@ build:
 run:
     stage: run
     script:
-<<<<<<< HEAD
-        - cd ${HW_DIR} && bin/${EXEC} -c cse307.dat
-test:
-    stage: test
-    script:
-        - cd ${HW_DIR} && bin/${EXEC}_tests -S --verbose=0 --timeout 5
-=======
         - cd ${HW_DIR} && bin/${EXEC} -i rsrc/imprimer.cmd
->>>>>>> HW4_CODE/master
+
