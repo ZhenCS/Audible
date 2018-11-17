@@ -52,7 +52,6 @@ void printHandler(int sig){
   }
 }
 
-FILE *outFile;
 int main(int argc, char *argv[])
 {
   if(signal(SIGCHLD, printHandler) == SIG_ERR){
@@ -77,14 +76,14 @@ int main(int argc, char *argv[])
 
 void batchMode(int argc, char **argv){
   if(argc > 1){
-
+    FILE *outFile;
     int oFlag = getFlag("-o", argc, argv);
     if(oFlag >= argc - 1){
       errorMessage("No output file specified");
       exit(EXIT_FAILURE);
     }else if(oFlag > 0){
-      char *file = argv[oFlag + 1];
-      if((outFile = freopen(file, "w", stdout)) == NULL){
+      char *ofile = argv[oFlag + 1];
+      if((outFile = freopen(ofile, "w", stdout)) == NULL){
         errorMessage("Unable to open input file.");
         exit(EXIT_FAILURE);
       }
@@ -110,12 +109,15 @@ void batchMode(int argc, char **argv){
         char *input = strtok(line, "\n");
 
         if(input != NULL){
-          printf("imp> %s\n", line);
+          printf("BATCH: imp> %s\n", line);
           runCommand(line);
         }
       }
 
-      fclose(script);
+      if(fclose(script) == EOF){
+        errorMessage("Unable to close input file.");
+        exit(EXIT_FAILURE);
+      }
     }
   }
 }
@@ -234,8 +236,7 @@ void runCommand(char* input){
         enablePrinter(strtok(NULL, " "));
     }
     if(!strcmp(flag1, "quit")){
-        if(outFile != NULL)
-          fclose(outFile);
+          fclose(stdout);
 
         exit(EXIT_SUCCESS);
     }
