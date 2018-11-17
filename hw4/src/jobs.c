@@ -124,8 +124,8 @@ int runJob(char *file, JOB *job, char *printername){
   job->status = RUNNING;
   job->chosen_printer = printer;
   gettimeofday(&job->change_time, NULL);
-  busyPrinter(printername);
   jobMessage(job);
+  busyPrinter(printername);
   return runJobProcess(file, job, printer);
 }
 
@@ -159,21 +159,22 @@ int runJobProcess(char *file, JOB *job, PRINTER *chosenPrinter){
     char **argv;
     CONVERSIONPATH *path = getConversionPath(job->file_type, chosenPrinter->type, MAX_CONVERSIONS);
     CONVERSIONPATH *head = path;
-    close(parent2child[1]);
 
+    close(parent2child[1]);
     if(path == NULL)
       dup2(fd, 0);
 
     while(path != NULL){
+
       if((pid2 = fork()) == 0){
-        sleep(5);
-        if(path == head){
+        sleep(1);
+        if(path == head)
           dup2(fd, parent2child[0]);
-          close(fd);
-        }
+
+        close(fd);
+
 
         dup2(parent2child[0], 0); //standard input
-        dup2(child2parent[0], parent2child[0]);
         dup2(child2parent[1], 1); //standard output
 
         //printf("FILE HAS BEEN CONVERTED TO %s\n", path->conversion->type);
@@ -201,9 +202,18 @@ int runJobProcess(char *file, JOB *job, PRINTER *chosenPrinter){
             exit(EXIT_FAILURE);
           }
         }
-
         path = path->next;
         if(path == NULL) dup2(child2parent[0], 0);
+        else{
+          close(child2parent[1]);
+          dup2(child2parent[0], parent2child[0]);
+          close(child2parent[0]);
+          if(pipe(child2parent) != 0){
+            errorMessage("Unable to create pipes.");
+            exit(EXIT_FAILURE);
+          }
+
+        }
       }//parent
     }//while
     close(parent2child[0]);
@@ -233,7 +243,7 @@ int runJobProcess(char *file, JOB *job, PRINTER *chosenPrinter){
         }
       }
     }
-
+    close(fd);
     exit(EXIT_SUCCESS);
   }else if(pid < 0){
     errorMessage("Unable to fork master process.");

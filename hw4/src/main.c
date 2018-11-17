@@ -30,10 +30,12 @@ void printHandler(int sig){
         JOB* job = getJobByPID(pid)->job;
         completeJob(job);
         freePrinter(job->chosen_printer->name);
+        runJobs();
       }else if(exitStatus == EXIT_FAILURE){
         JOB* job = getJobByPID(pid)->job;
         abortJob(job);
         freePrinter(job->chosen_printer->name);
+        runJobs();
       }
     }else if(WIFSTOPPED(status)){
       JOB* job = getJobByPID(pid)->job;
@@ -45,6 +47,7 @@ void printHandler(int sig){
       JOB* job = getJobByPID(pid)->job;
       abortJob(job);
       freePrinter(job->chosen_printer->name);
+      runJobs();
     }
   }
 }
@@ -149,22 +152,24 @@ void runCommand(char* input){
         printerStatus();
     }
     if(!strcmp(flag1, "jobs")){
-        removeJobs();
         jobStatus();
     }
     if(!strcmp(flag1, "pause")){
       char *jobID = strtok(NULL, " ");
-
       if(jobID != NULL){
         int id = atoi(jobID);
         if(id == 0 && strcmp(jobID, "0") != 0){
           errorMessage("Correct Use: pause jobID");
         }else{
-
-          JOB *job = getJobByID(id)->job;
-          if(job != NULL)
-            killpg(job->pgid, SIGTSTP);
-          //pauseJob(job);
+          JOBNODE *jobNode = getJobByID(id);
+          if(jobNode != NULL){
+            if(jobNode->job->status == RUNNING)
+              killpg(jobNode->job->pgid, SIGTSTP);
+            else
+              errorMessage("Job is not running.");
+          }
+          else
+            errorMessage("No job with that ID.");
         }
       }
     }
@@ -176,10 +181,15 @@ void runCommand(char* input){
         if(id == 0 && strcmp(jobID, "0") != 0){
           errorMessage("Correct Use: resume jobID");
         }else{
-          JOB *job = getJobByID(id)->job;
-          if(job != NULL)
-            killpg(job->pgid, SIGCONT);
-          //resumeJob(job);
+          JOBNODE *jobNode = getJobByID(id);
+          if(jobNode != NULL){
+            if(jobNode->job->status == PAUSED)
+              killpg(jobNode->job->pgid, SIGCONT);
+            else
+              errorMessage("Job is not paused.");
+          }
+          else
+            errorMessage("No job with that ID.");
         }
       }
     }
@@ -191,10 +201,15 @@ void runCommand(char* input){
         if(id == 0 && strcmp(jobID, "0") != 0){
           errorMessage("Correct Use: cancel jobID");
         }else{
-          JOB *job = getJobByID(id)->job;
-          if(job != NULL)
-            killpg(job->pgid, SIGTERM);
-          //abortJob(job);
+          JOBNODE *jobNode = getJobByID(id);
+          if(jobNode != NULL){
+            if(jobNode->job->status == RUNNING)
+              killpg(jobNode->job->pgid, SIGTERM);
+            else
+              errorMessage("Job is not running.");
+          }
+          else
+            errorMessage("No job with that ID.");
         }
       }
     }
