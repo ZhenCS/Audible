@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
         free(input);
         runJobs();
         removeJobs();
+    }else{
+      exit(EXIT_FAILURE);
     }
   }
   exit(EXIT_SUCCESS);
