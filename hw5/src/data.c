@@ -163,3 +163,34 @@ void version_dispose(VERSION *vp){
 
     free(vp);
 }
+//version = non circular double link list
+void version_dispose_all(VERSION *vp){
+    while(vp != NULL){
+        version_dispose(vp);
+        vp = vp->next;
+    }
+}
+
+void version_show_all(VERSION *vp){
+    while(vp != NULL){
+
+        if(trans_get_status(vp->creator) == TRANS_COMMITTED){
+            if(vp->blob != NULL && vp->blob->content != NULL)
+                fprintf(stderr, "{creator=%i (committed), blob=%p [%s]}", vp->creator->id, &vp->blob, vp->blob->content);
+            else
+                fprintf(stderr, "{creator=%i (committed), (NULL blob)}", vp->creator->id);
+        }else if(trans_get_status(vp->creator) == TRANS_ABORTED){
+            if(vp->blob != NULL && vp->blob->content != NULL)
+                fprintf(stderr, "{creator=%i (aborted), blob=%p [%s]}", vp->creator->id, &vp->blob, vp->blob->content);
+            else
+                fprintf(stderr, "{creator=%i (aborted), (NULL blob)}", vp->creator->id);
+        }else{
+            if(vp->blob != NULL && vp->blob->content != NULL)
+                fprintf(stderr, "{creator=%i (pending), blob=%p [%s]}", vp->creator->id, &vp->blob, vp->blob->content);
+            else
+                fprintf(stderr, "{creator=%i (pending), (NULL blob)}", vp->creator->id);
+        }
+
+        vp = vp->next;
+    }
+}

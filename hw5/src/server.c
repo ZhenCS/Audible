@@ -54,11 +54,15 @@ void *xacto_client_service(void *arg){
         store_show();
         trans_show_all();
 
-        if(pkt->type == XACTO_COMMIT_PKT){
+        if(pkt->type == XACTO_COMMIT_PKT || status == TRANS_ABORTED){
             free(pkt);
             free(getBlob);
             debug("[%i] Ending client service ", fd);
             creg_unregister(client_registry, fd);
+
+            if(status == TRANS_ABORTED)
+                trans_abort(trans);
+
             return NULL;
         }
     }
@@ -131,7 +135,7 @@ TRANS_STATUS xacto_get(int fd, TRANSACTION *trans, BLOB **valueBlob){
 
     if((*valueBlob) != NULL){
         debug("[%i] value is %p [%s]", fd, (*valueBlob)->content, (*valueBlob)->content);
-        blob_unref(*valueBlob, "obtained from store_get");
+        //blob_unref(*valueBlob, "obtained from store_get");
     }
     else
         debug("[%i] value is NULL", fd);

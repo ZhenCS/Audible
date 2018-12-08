@@ -17,18 +17,18 @@ void initClientList(CLIENT_REGISTRY *cr){
 
 
 CLIENT_REGISTRY *creg_init(){
-    CLIENT_REGISTRY *client_register;
-    if((client_register = (CLIENT_REGISTRY *)malloc(sizeof(CLIENT_REGISTRY))) < 0){
+    CLIENT_REGISTRY *client_registry;
+    if((client_registry = (CLIENT_REGISTRY *)malloc(sizeof(CLIENT_REGISTRY))) < 0){
         errorMessage("Unable to initialize client register");
         exit(EXIT_FAILURE);
     }
 
-    pthread_mutex_init(&client_register->mutex, NULL);
-    sem_init(&client_register->sem, 0, 1);
-    client_register->clients = 0;
-    initClientList(client_register);
+    pthread_mutex_init(&client_registry->mutex, NULL);
+    sem_init(&client_registry->sem, 0, 1);
+    client_registry->clients = 0;
+    initClientList(client_registry);
 
-    return client_register;
+    return client_registry;
 }
 
 void creg_fini(CLIENT_REGISTRY *cr){

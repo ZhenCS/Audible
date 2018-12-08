@@ -45,7 +45,7 @@ TRANSACTION *trans_create(void){
     sem_init(&trans->sem, 0, 1);
     pthread_mutex_init(&trans->mutex, NULL);
 
-    trans_add(trans);
+    add_trans_list(trans);
     debug("Created new transaction %i", id);
     trans_ref(trans, "transaction created");
 
@@ -75,6 +75,13 @@ void trans_unref(TRANSACTION *tp, char *why){
                 tp->id, tp->refcnt, tp->refcnt - 1, why);
 
     tp->refcnt -= 1;
+
+    /*if(tp->refcnt == 0){
+        debug("Free transaction %i", tp->id);
+        remove_trans_list(tp);
+        free(tp);
+        return;
+    }*/
     pthread_mutex_unlock(&tp->mutex);
 }
 
@@ -101,21 +108,21 @@ TRANS_STATUS trans_commit(TRANSACTION *tp){
 
     while(depend != NULL){
         debug("transaction %i checking status of dependecy %i", tp->id, depend->trans->id);
-        if(depend->trans->status == TRANS_ABORTED){
+        if(trans_get_status(depend->trans) == TRANS_ABORTED){
             status = TRANS_ABORTED;
             break;
-        }else if(depend->trans->status == TRANS_PENDING){
+        }else if(trans_get_status(depend->trans) == TRANS_PENDING){
             pthread_mutex_lock(&depend->trans->mutex);
             depend->trans->waitcnt += 1;
             pthread_mutex_unlock(&depend->trans->mutex);
             debug("transaction %i waiting on dependecy %i", tp->id, depend->trans->id);
 
-            while(depend->trans->status == TRANS_PENDING){
+            while(trans_get_status(depend->trans) == TRANS_PENDING){
                 P(&depend->trans->sem);
                 V(&depend->trans->sem);
             }
 
-            if(depend->trans->status == TRANS_ABORTED)
+            if(trans_get_status(depend->trans) == TRANS_ABORTED)
                 status = TRANS_ABORTED;
             debug("transaction %i finished waiting for dependecy %i", tp->id, depend->trans->id);
         }
@@ -138,14 +145,14 @@ TRANS_STATUS trans_commit(TRANSACTION *tp){
 }
 
 TRANS_STATUS trans_abort(TRANSACTION *tp){
-    if(tp->status == TRANS_COMMITTED){
+    if(trans_get_status(tp) == TRANS_COMMITTED){
         errorMessage("FATAL TRANSACTION ERROR");
         exit(EXIT_FAILURE);
     }
 
     debug("transaction %i trying to abort", tp->id);
 
-    if(tp->status == TRANS_PENDING){
+    if(trans_get_status(tp) == TRANS_PENDING){
         P(&tp->sem);
         tp->status = TRANS_ABORTED;
 
@@ -191,13 +198,7 @@ void trans_show_all(void){
     fprintf(stderr, "\n");
 }
 
-void trans_add(TRANSACTION *tp){
-    tp->next = &trans_list;
-    tp->prev = trans_list.prev;
 
-    trans_list.prev->next = tp;
-    trans_list.prev = tp;
-}
 
 
 DEPENDENCY *dependency_create(TRANSACTION *tp){
@@ -214,6 +215,9 @@ DEPENDENCY *dependency_create(TRANSACTION *tp){
 }
 
 void releaseDependents(TRANSACTION *tp){
+    if(tp == NULL)
+        return;
+
     debug("Released %i waiters on transaction %i", tp->waitcnt, tp->id);
 
     pthread_mutex_lock(&tp->mutex);
@@ -222,4 +226,17 @@ void releaseDependents(TRANSACTION *tp){
         V(&tp->sem);
     }
     pthread_mutex_unlock(&tp->mutex);
+}
+
+void add_trans_list(TRANSACTION *tp){
+    tp->next = &trans_list;
+    tp->prev = trans_list.prev;
+
+    trans_list.prev->next = tp;
+    trans_list.prev = tp;
+}
+
+void remove_trans_list(TRANSACTION *tp){
+    tp->prev->next = tp->next;
+    tp->next->prev = tp->prev;
 }
