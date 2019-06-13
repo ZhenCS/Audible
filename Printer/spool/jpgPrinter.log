@@ -1,0 +1,220 @@
+Successfully forked as daemon
+16 Nov 2018 18:47:30: PID file: spool/jpgPrinter.pid
+16 Nov 2018 18:47:31: Accepted connection, fd = 4
+16 Nov 2018 18:47:36: Created stream for input
+16 Nov 2018 18:47:36: File type is 'jpg'
+16 Nov 2018 18:47:36: Saving data to file spool/jpgPrinter_jpg_1542412056.439851
+16 Nov 2018 18:47:36: Created stream for output
+16 Nov 2018 18:47:36: Bytes received: 12042
+16 Nov 2018 18:47:36: Connection terminated
+16 Nov 2018 18:52:13: Accepted connection, fd = 4
+16 Nov 2018 18:52:18: Created stream for input
+16 Nov 2018 18:52:18: File type is 'jpg'
+16 Nov 2018 18:52:18: Wrong file type for this printer (received ico, require jpg)
+16 Nov 2018 18:52:18: Saving data to file spool/jpgPrinter_ico_1542412338.100798
+16 Nov 2018 18:52:18: Created stream for output
+16 Nov 2018 18:52:18: Bytes received: 12042
+16 Nov 2018 18:52:18: Connection terminated
+16 Nov 2018 18:55:50: Accepted connection, fd = 4
+16 Nov 2018 18:55:55: Created stream for input
+16 Nov 2018 18:55:55: File type is 'jpg'
+16 Nov 2018 18:55:55: Saving data to file spool/jpgPrinter_jpg_1542412555.635318
+16 Nov 2018 18:55:55: Created stream for output
+16 Nov 2018 18:55:55: Bytes received: 0
+16 Nov 2018 18:55:55: Connection terminated
+16 Nov 2018 19:12:52: Accepted connection, fd = 4
+16 Nov 2018 19:12:57: Created stream for input
+16 Nov 2018 19:12:57: File type is 'jpg'
+16 Nov 2018 19:12:57: Saving data to file spool/jpgPrinter_jpg_1542413577.214074
+16 Nov 2018 19:12:57: Created stream for output
+16 Nov 2018 19:12:57: Bytes received: 12042
+16 Nov 2018 19:12:57: Connection terminated
+16 Nov 2018 19:13:18: Accepted connection, fd = 4
+16 Nov 2018 19:13:23: Created stream for input
+16 Nov 2018 19:13:23: File type is 'jpg'
+16 Nov 2018 19:13:23: Saving data to file spool/jpgPrinter_jpg_1542413603.675065
+16 Nov 2018 19:13:23: Created stream for output
+16 Nov 2018 19:13:23: Bytes received: 12042
+16 Nov 2018 19:13:23: Connection terminated
+16 Nov 2018 19:19:05: Accepted connection, fd = 4
+16 Nov 2018 19:19:10: Created stream for input
+16 Nov 2018 19:19:10: File type is 'jpg'
+16 Nov 2018 19:19:10: Saving data to file spool/jpgPrinter_jpg_1542413950.507280
+16 Nov 2018 19:19:10: Created stream for output
+16 Nov 2018 19:19:10: Bytes received: 0
+16 Nov 2018 19:19:10: Connection terminated
+16 Nov 2018 19:29:05: Accepted connection, fd = 4
+16 Nov 2018 19:29:10: Created stream for input
+16 Nov 2018 19:29:10: File type is 'jpg'
+16 Nov 2018 19:29:10: Saving data to file spool/jpgPrinter_jpg_1542414550.127621
+16 Nov 2018 19:29:10: Created stream for output
+16 Nov 2018 19:29:10: Bytes received: 12042
+16 Nov 2018 19:29:10: Connection terminated
+16 Nov 2018 19:29:24: Accepted connection, fd = 4
+16 Nov 2018 19:29:29: Created stream for input
+16 Nov 2018 19:29:29: File type is 'jpg'
+16 Nov 2018 19:29:29: Saving data to file spool/jpgPrinter_jpg_1542414569.23764
+16 Nov 2018 19:29:29: Created stream for output
+16 Nov 2018 19:29:29: Bytes received: 12042
+16 Nov 2018 19:29:29: Connection terminated
+16 Nov 2018 19:33:35: Accepted connection, fd = 4
+16 Nov 2018 19:33:40: Created stream for input
+16 Nov 2018 19:33:40: File type is 'jpg'
+16 Nov 2018 19:33:40: Saving data to file spool/jpgPrinter_jpg_1542414820.330526
+16 Nov 2018 19:33:40: Created stream for output
+16 Nov 2018 19:33:40: Bytes received: 12042
+16 Nov 2018 19:33:40: Connection terminated
+16 Nov 2018 19:34:57: Accepted connection, fd = 4
+16 Nov 2018 19:35:02: Created stream for input
+16 Nov 2018 19:35:02: File type is 'jpg'
+16 Nov 2018 19:35:02: Saving data to file spool/jpgPrinter_jpg_1542414902.602281
+16 Nov 2018 19:35:02: Created stream for output
+16 Nov 2018 19:35:02: Bytes received: 12042
+16 Nov 2018 19:35:02: Connection terminated
+16 Nov 2018 19:36:00: Accepted connection, fd = 4
+16 Nov 2018 19:36:05: Created stream for input
+16 Nov 2018 19:36:05: File type is 'jpg'
+16 Nov 2018 19:36:05: Saving data to file spool/jpgPrinter_jpg_1542414965.946328
+16 Nov 2018 19:36:05: Created stream for output
+16 Nov 2018 19:36:06: Bytes received: 12042
+16 Nov 2018 19:36:06: Connection terminated
+16 Nov 2018 19:42:06: Accepted connection, fd = 4
+16 Nov 2018 19:42:11: Created stream for input
+16 Nov 2018 19:42:11: File type is 'jpg'
+16 Nov 2018 19:42:11: Saving data to file spool/jpgPrinter_jpg_1542415331.283541
+16 Nov 2018 19:42:11: Created stream for output
+16 Nov 2018 19:42:11: Bytes received: 12042
+16 Nov 2018 19:42:11: Connection terminated
+16 Nov 2018 19:43:03: Accepted connection, fd = 4
+16 Nov 2018 19:43:08: Created stream for input
+16 Nov 2018 19:43:08: File type is 'jpg'
+16 Nov 2018 19:43:08: Saving data to file spool/jpgPrinter_jpg_1542415388.418761
+16 Nov 2018 19:43:08: Created stream for output
+16 Nov 2018 19:43:08: Bytes received: 12042
+16 Nov 2018 19:43:08: Connection terminated
+16 Nov 2018 19:44:59: Accepted connection, fd = 4
+16 Nov 2018 19:45:04: Created stream for input
+16 Nov 2018 19:45:04: File type is 'jpg'
+16 Nov 2018 19:45:04: Saving data to file spool/jpgPrinter_jpg_1542415504.302196
+16 Nov 2018 19:45:04: Created stream for output
+16 Nov 2018 19:45:04: Bytes received: 12042
+16 Nov 2018 19:45:04: Connection terminated
+16 Nov 2018 19:46:36: Accepted connection, fd = 4
+16 Nov 2018 19:46:41: Created stream for input
+16 Nov 2018 19:46:41: File type is 'jpg'
+16 Nov 2018 19:46:41: Saving data to file spool/jpgPrinter_jpg_1542415601.233265
+16 Nov 2018 19:46:41: Created stream for output
+16 Nov 2018 19:46:41: Bytes received: 12042
+16 Nov 2018 19:46:41: Connection terminated
+16 Nov 2018 19:47:29: Accepted connection, fd = 4
+16 Nov 2018 19:47:34: Created stream for input
+16 Nov 2018 19:47:34: File type is 'jpg'
+16 Nov 2018 19:47:34: Saving data to file spool/jpgPrinter_jpg_1542415654.399626
+16 Nov 2018 19:47:34: Created stream for output
+16 Nov 2018 19:47:34: Bytes received: 12042
+16 Nov 2018 19:47:34: Connection terminated
+16 Nov 2018 19:48:58: Accepted connection, fd = 4
+16 Nov 2018 19:49:03: Created stream for input
+16 Nov 2018 19:49:03: File type is 'jpg'
+16 Nov 2018 19:49:03: Saving data to file spool/jpgPrinter_jpg_1542415743.892121
+16 Nov 2018 19:49:03: Created stream for output
+16 Nov 2018 19:49:03: Bytes received: 12042
+16 Nov 2018 19:49:03: Connection terminated
+16 Nov 2018 19:52:01: Accepted connection, fd = 4
+16 Nov 2018 19:52:06: Created stream for input
+16 Nov 2018 19:52:06: File type is 'jpg'
+16 Nov 2018 19:52:06: Saving data to file spool/jpgPrinter_jpg_1542415926.822197
+16 Nov 2018 19:52:06: Created stream for output
+16 Nov 2018 19:52:06: Bytes received: 0
+16 Nov 2018 19:52:06: Connection terminated
+16 Nov 2018 19:52:25: Accepted connection, fd = 4
+16 Nov 2018 19:52:30: Created stream for input
+16 Nov 2018 19:52:30: File type is 'jpg'
+16 Nov 2018 19:52:30: Saving data to file spool/jpgPrinter_jpg_1542415950.116047
+16 Nov 2018 19:52:30: Created stream for output
+16 Nov 2018 19:52:30: Bytes received: 0
+16 Nov 2018 19:52:30: Connection terminated
+16 Nov 2018 19:53:19: Accepted connection, fd = 4
+16 Nov 2018 19:53:24: Created stream for input
+16 Nov 2018 19:53:24: File type is 'jpg'
+16 Nov 2018 19:53:24: Saving data to file spool/jpgPrinter_jpg_1542416004.879444
+16 Nov 2018 19:53:24: Created stream for output
+16 Nov 2018 19:53:24: Bytes received: 12042
+16 Nov 2018 19:53:24: Connection terminated
+16 Nov 2018 19:54:01: Accepted connection, fd = 4
+16 Nov 2018 19:54:06: Created stream for input
+16 Nov 2018 19:54:06: File type is 'jpg'
+16 Nov 2018 19:54:06: Saving data to file spool/jpgPrinter_jpg_1542416046.587314
+16 Nov 2018 19:54:06: Created stream for output
+16 Nov 2018 19:54:06: Bytes received: 12042
+16 Nov 2018 19:54:06: Connection terminated
+16 Nov 2018 19:54:16: Accepted connection, fd = 4
+16 Nov 2018 19:54:21: Created stream for input
+16 Nov 2018 19:54:21: File type is 'jpg'
+16 Nov 2018 19:54:21: Saving data to file spool/jpgPrinter_jpg_1542416061.132072
+16 Nov 2018 19:54:21: Created stream for output
+16 Nov 2018 19:54:21: Bytes received: 12042
+16 Nov 2018 19:54:21: Connection terminated
+16 Nov 2018 19:55:51: Accepted connection, fd = 4
+16 Nov 2018 19:55:56: Created stream for input
+16 Nov 2018 19:55:56: File type is 'jpg'
+16 Nov 2018 19:55:56: Saving data to file spool/jpgPrinter_jpg_1542416156.678909
+16 Nov 2018 19:55:56: Created stream for output
+16 Nov 2018 19:55:56: Bytes received: 12042
+16 Nov 2018 19:55:56: Connection terminated
+16 Nov 2018 19:57:06: Accepted connection, fd = 4
+16 Nov 2018 19:57:11: Created stream for input
+16 Nov 2018 19:57:11: File type is 'jpg'
+16 Nov 2018 19:57:11: Saving data to file spool/jpgPrinter_jpg_1542416231.235291
+16 Nov 2018 19:57:11: Created stream for output
+16 Nov 2018 19:57:11: Bytes received: 12042
+16 Nov 2018 19:57:11: Connection terminated
+16 Nov 2018 19:57:47: Accepted connection, fd = 4
+16 Nov 2018 19:57:52: Created stream for input
+16 Nov 2018 19:57:52: File type is 'jpg'
+16 Nov 2018 19:57:52: Saving data to file spool/jpgPrinter_jpg_1542416272.530836
+16 Nov 2018 19:57:52: Created stream for output
+16 Nov 2018 19:57:52: Bytes received: 12042
+16 Nov 2018 19:57:52: Connection terminated
+16 Nov 2018 20:02:58: Accepted connection, fd = 4
+16 Nov 2018 20:03:03: Created stream for input
+16 Nov 2018 20:03:03: File type is 'jpg'
+16 Nov 2018 20:03:03: Saving data to file spool/jpgPrinter_jpg_1542416583.436486
+16 Nov 2018 20:03:03: Created stream for output
+16 Nov 2018 20:03:03: Bytes received: 12042
+16 Nov 2018 20:03:03: Connection terminated
+16 Nov 2018 20:06:03: Accepted connection, fd = 4
+16 Nov 2018 20:06:08: Created stream for input
+16 Nov 2018 20:06:08: File type is 'jpg'
+16 Nov 2018 20:06:08: Saving data to file spool/jpgPrinter_jpg_1542416768.64250
+16 Nov 2018 20:06:08: Created stream for output
+16 Nov 2018 20:06:08: Bytes received: 12042
+16 Nov 2018 20:06:08: Connection terminated
+16 Nov 2018 20:08:21: Accepted connection, fd = 4
+16 Nov 2018 20:08:26: Created stream for input
+16 Nov 2018 20:08:26: File type is 'jpg'
+16 Nov 2018 20:08:26: Saving data to file spool/jpgPrinter_jpg_1542416906.904411
+16 Nov 2018 20:08:26: Created stream for output
+16 Nov 2018 20:08:26: Bytes received: 12042
+16 Nov 2018 20:08:26: Connection terminated
+16 Nov 2018 20:11:10: Accepted connection, fd = 4
+16 Nov 2018 20:11:15: Created stream for input
+16 Nov 2018 20:11:15: File type is 'jpg'
+16 Nov 2018 20:11:15: Saving data to file spool/jpgPrinter_jpg_1542417075.43500
+16 Nov 2018 20:11:15: Created stream for output
+16 Nov 2018 20:11:15: Bytes received: 12042
+16 Nov 2018 20:11:15: Connection terminated
+16 Nov 2018 21:02:14: Accepted connection, fd = 4
+16 Nov 2018 21:02:19: Created stream for input
+16 Nov 2018 21:02:19: File type is 'jpg'
+16 Nov 2018 21:02:19: Saving data to file spool/jpgPrinter_jpg_1542420139.428847
+16 Nov 2018 21:02:19: Created stream for output
+16 Nov 2018 21:02:19: Bytes received: 12042
+16 Nov 2018 21:02:19: Connection terminated
+16 Nov 2018 21:10:57: Accepted connection, fd = 4
+16 Nov 2018 21:11:02: Created stream for input
+16 Nov 2018 21:11:02: File type is 'jpg'
+16 Nov 2018 21:11:02: Saving data to file spool/jpgPrinter_jpg_1542420662.971290
+16 Nov 2018 21:11:02: Created stream for output
+16 Nov 2018 21:11:02: Bytes received: 12042
+16 Nov 2018 21:11:02: Connection terminated

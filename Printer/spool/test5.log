@@ -1,0 +1,16 @@
+Successfully forked as daemon
+16 Nov 2018 18:02:36: PID file: spool/test5.pid
+16 Nov 2018 18:02:37: Accepted connection, fd = 4
+16 Nov 2018 18:02:42: Created stream for input
+16 Nov 2018 18:02:42: File type is 'txt'
+16 Nov 2018 18:02:42: Saving data to file spool/test5_txt_1542409362.188573
+16 Nov 2018 18:02:42: Created stream for output
+16 Nov 2018 18:02:42: Bytes received: 104
+16 Nov 2018 18:02:42: Connection terminated
+16 Nov 2018 18:37:06: Accepted connection, fd = 4
+16 Nov 2018 18:37:11: Created stream for input
+16 Nov 2018 18:37:11: File type is 'txt'
+16 Nov 2018 18:37:11: Saving data to file spool/test5_txt_1542411431.672108
+16 Nov 2018 18:37:11: Created stream for output
+16 Nov 2018 18:37:11: Bytes received: 205
+16 Nov 2018 18:37:11: Connection terminated

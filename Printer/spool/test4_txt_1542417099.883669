@@ -1,0 +1,169 @@
+15-441: Computer Networks
+Homework 2
+Assigned: Feburary 19th
+Due: Feburary 28th
+1. Frank Fandango runs a 10Mbit/s Ethernet between the CMU campus and the homes of his friends. All
+of these hosts are in a single broadcast domain. Fortunately, they are located just within the maximum
+distance of an Ethernet. The total size of an Ethernet can be about 2.5 kilometers, , and an Ethernet
+has a minimum packet size of 512 bits.
+Frank upgrades his network to 100Mbit/s Ethernet, and notices that when only one person sends at a
+time, or when he sends very large packets, his network works. But when many people send very small
+packets, things don’t work at all.
+(a) Explain how a minimum packet size can help to detect collisions in Ethernet:
+Solution: Consider the extreme case, suppose there is no minimum packet size, host A at one
+end sends a frame of only 1 bit to host B at the other end. After sending the 1-bit frame, host
+A is convinced that there is no collision because it does not hear any interference. However,
+the frame is still on its way to the other end, and if host B sends another frame at this time,
+collision can happen. To determine the minimum packet size, consider the worst case for
+Ethernet’s collision detection:
+1. At t0 : A sends a frame
+2. At t0 + prop: B sends another frame right before it can carrier sense the A’s frame
+3. At t0 + 2 ∗ prop: A is still transmitting while the B’s frame arrived at A
+thus the minimum packet size is 2 ∗ prop ∗ bandwidth.
+(b) Help Frank out. Compute the threshold of how big packets must be in order for things to work:
+Solution:
+One solution: The Ethernet is 10 times faster, and Frank’s users were at the boundary.
+Therefore, the packets must be 10 times larger – 5120 bits.
+Another solution: Calculate the propagation delay as 2500/(1.8 ∗ 108 ) = 14µs, and then the
+minimum packet size is 2∗14∗10−6 ∗100∗106 = 2800 bits. Note that the result is different from
+the first solution. This is because the design choice of 512 bits in 10Mbps Ethernet is roughly
+twice conservative, to take into consideration of many practical factors, e.g. slower propogation
+speed, delay introduced by repeaters, etc.
+(c) One solution that Frank came up with is to raise the minimum packet size to the answer from part
+(b). Suppose that Frank cannot modify the minimum packet size, move the endpoints, lay new
+cable, or change the software or configuration on the endpoints. You may add new devices to the
+network. How could Frank change the topology to fix his problems anyway?
+
+1
+
+Solution:
+full credit: Add bridges or switches to separate the network into multiple collision domains.
+partial credit: Add routers. Adding routers would require that he change the IP address /
+gateway configuration on the hosts.
+2. For this question, assume that the routers use RIP to calculate their forwarding tables.
+
+(a) Fill in the routing table for node A, after convergence.
+Solution:
+Destination
+A
+B
+C
+D
+E
+F
+
+Cost
+0
+1
+1
+2
+2
+3
+
+Next Hop
+B
+C
+B
+C
+B/C
+
+(b) After convergence, node E goes down. Fill in the final routing table for B, after re-convergence.
+Solution:
+Destination
+A
+B
+C
+D
+E
+F
+
+Cost
+1
+0
+1
+1
+16/∞
+2
+
+Next Hop
+A
+C
+D
+D
+
+3. Imagine the Internet is divided into the Autonomous Systems shows below. In this problem we assume
+NO subnetting and NO supernetting and NO CIDR is used. A packet is being sent from Host H1 to
+Host H2. The packets takes the following route: H1 −→ R1 −→ R2 −→ R3 −→ R4 −→ R5 −→ R6 −→
+H2
+
+Page 2
+
+Some information: R2, R3, R4, and R5 are gateway routers. Assume that there are many routers
+and networks within each AS that are not shown. Assume also that there are NO default
+entries in routers. Please answer the questions below in 10 words or less. We are NOT
+looking for numerical answers.
+(a) Which of the labeled routers above likely use the BGP routing algorithm to create their forwarding
+tables?
+Solution: R2, R3, R4, R5. Recall that gateway routers speak BGP when computing routes
+(b) How many entries does R1’s forwarding table have?
+Solution: Number of networks in the AS containing R1. Recall that R1 needs to be able to
+reach any of the networks within its AS, not just those networks that it is directly connected
+to.
+(c) Assume that host H1’s IP address is 205.96.17.172, What can we say about the IP address of R1
+Solution: It has the same network number prefix as H1, namely 205.96.17. Recall that H1
+must have the same network number as R1, since R1 is the next IP hop from H1 and thus R1
+has an interface on the same network as H1. Observing that H1 has a class C IP address, we
+know that R1 and H1 share the network number 205.96.17.
+(d) Give an example of an entry in R1’s forwarding table (don’t leave out any fields).
+Solution: (205.95.17, 2, 8:0:2b:e4:b:1:2) where (network prefix, outing interface, MAC)
+(e) How many entries are there in R2’s forwarding table?
+Solution: Number of networks in whole Internet. Remember that R2 is a gateway router and
+thus needs to know about every network in the Internet.
+(f) Suppose AS X thinks that AS Y drops too many packets. Using only BGP, is it possible for AS
+X to implement a policy stating that “traffic outbound from my AS should not cross Y ?” Why or
+why not?
+
+Page 3
+
+Solution: Yes, assuming it has an alternative route. Prefer paths that don’t contain Y . Of
+course, if the only path to a destination contains Y , it can not reach that destination without
+going through Y .
+(g) Now suppose AS X thinks that AS Y generates a lot of illegal file sharing traffic. Using only BGP,
+is it possible for AS X to implement a policy stating that, “I don’t want to carry traffic from Y
+to my customers?” Why or why not? Assume that AS X does not want to deny transit to traffic
+from any other AS.
+Solution: Not in general. Traffic from a neighbor might be from both good ASs and Y . BGP
+can only accept all the traffic by advertising a route or deny all of it by not advertising.
+4. Maggie decides to start a small company. She asks her ISP, Acme Networks, to give her enough addresses
+for 1200 hosts. ACME allocates a subblock from the 192.1.* address range that they own and tells Maggie
+to use the following addresses:
+192.1.0.*
+192.1.1.*
+192.1.2.*
+192.1.3.*
+192.1.4.*
+(a) Maggie has heard that the size of the Internet routing table has grown to huge proportions, and
+that to be a good citizen, she should announce the fewest number of routes possible to exactly cover
+her IP addresses.
+Under CIDR, what is the smallest set of network numbers that the rest of the world would use to
+describe Maggie’s networks (please use address & prefix format - e.g. 128.2/16)?
+Solution: 192.1.0/22 and 192.1.4/24
+(b) Maggie has a second ISP that she uses, RoadRunner Networks. She announces some of her network
+addresses to both Acme and RoadRunner. (Maggie hadn’t talked to you yet—these announcements
+do not correspond to the answers you provided to the previous question). As a result, some router
+far away in the network produces a forwarding table with the following entries:
+Destination Next Hop
+192.1/16
+1.2.3.4
+192.1.0/23
+1.2.3.5
+192.1.4/24
+1.2.3.6
+192.1.1/24
+1.2.3.7
+Which next hop should the router use for a packet destined to 192.1.0.1?
+Solution: Using longest prefix match, it should use 1.2.3.5
+
+Page 4
+
+

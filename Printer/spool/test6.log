@@ -1,0 +1,9 @@
+Successfully forked as daemon
+16 Nov 2018 18:03:19: PID file: spool/test6.pid
+16 Nov 2018 18:03:20: Accepted connection, fd = 4
+16 Nov 2018 18:03:25: Created stream for input
+16 Nov 2018 18:03:25: File type is 'pdf'
+16 Nov 2018 18:03:25: Saving data to file spool/test6_pdf_1542409405.340386
+16 Nov 2018 18:03:25: Created stream for output
+16 Nov 2018 18:03:25: Bytes received: 43
+16 Nov 2018 18:03:25: Connection terminated

@@ -1,0 +1,21 @@
+type apples
+type b
+type txt
+type pdf
+type png
+type jpg
+type ico
+type pbm
+conversion pdf txt /usr/bin/pdftotext - -
+
+conversion apples b /bin/cat
+conversion b txt /bin/cat
+
+conversion png ico /usr/bin/convert - -
+conversion ico pbm /usr/bin/convert - -
+conversion pbm jpg /usr/bin/convert - -
+
+printer test4 txt
+printer jpgPrinter jpg
+enable jpgPrinter
+enable test4

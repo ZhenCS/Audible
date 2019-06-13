@@ -1,0 +1,13 @@
+imp> type ps
+imp> type pdf
+imp> type png
+imp> type pcl
+imp> conversion ps ps ps2ps
+imp> conversion pdf ps pdf2ps
+imp> conversion ps png ps2png
+imp> conversion png pcl png2pcl
+imp> printer alice ps
+PRINTER, 0, alice, ps, disabled, idle
+imp> printer bob pcl
+PRINTER, 1, bob, pcl, disabled, idle
+imp> quit
