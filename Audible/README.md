@@ -2,8 +2,10 @@
 
 This program takes in an .au audio file and can speed up or slow down the audio
 
-#How to Use
+# How to Use
+
 bin.audible [-h] -u|-d|-c [-f FACTOR] [-k KEY] [-p]
+
     -h      Help: displays this help menu.
     -d      Slow down: decrease playback speed by inserting interpolated samples
 
@@ -20,6 +22,7 @@ bin.audible [-h] -u|-d|-c [-f FACTOR] [-k KEY] [-p]
             -p          Preserve input annotation without modification
 
 [< AUDIO]   AUDIO:  The path for the input audio
+
 [> OUT]     OUT:    The path to the output audio
                     If file does not exist, it will create it. If the file does exist, it will rewrite it.
 
